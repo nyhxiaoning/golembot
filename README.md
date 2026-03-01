@@ -1,14 +1,19 @@
 [English](README.md) | [中文](README.zh-CN.md)
 
-# GolemBot — Local-First AI Assistant Platform
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/0xranx/golembot/main/docs/assets/logo-golem-light.svg">
+    <img src="https://raw.githubusercontent.com/0xranx/golembot/main/docs/assets/logo-golem-dark.svg" alt="GolemBot" width="560">
+  </picture>
+</p>
 
-[![CI](https://github.com/0xranx/golembot/actions/workflows/ci.yml/badge.svg)](https://github.com/0xranx/golembot/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/golembot.svg)](https://www.npmjs.com/package/golembot)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org/)
+<p align="center">
+  <a href="https://github.com/0xranx/golembot/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/0xranx/golembot/ci.yml?branch=main&style=for-the-badge" alt="CI"></a>
+  <a href="https://www.npmjs.com/package/golembot"><img src="https://img.shields.io/npm/v/golembot.svg?style=for-the-badge" alt="npm version"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="MIT License"></a>
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg?style=for-the-badge" alt="Node.js"></a>
+</p>
 
-> **Coding Agent = the soul, GolemBot = the body of clay.**
->
 > Use the Coding Agents you already have (Cursor / Claude Code / OpenCode) as the brain — so they can do more than just chat, they can actually get things done.
 
 GolemBot is a TypeScript library + CLI that wraps Coding Agent CLIs into a unified AI assistant engine. One command spins up an intelligent assistant connected to Feishu, DingTalk, or WeCom — running locally, fully transparent, and engine-swappable.

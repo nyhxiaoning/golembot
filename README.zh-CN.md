@@ -1,14 +1,19 @@
 [English](README.md) | [中文](README.zh-CN.md)
 
-# GolemBot — 本地优先的 AI 助手平台
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/0xranx/golembot/main/docs/assets/logo-golem-light.svg">
+    <img src="https://raw.githubusercontent.com/0xranx/golembot/main/docs/assets/logo-golem-dark.svg" alt="GolemBot" width="560">
+  </picture>
+</p>
 
-[![CI](https://github.com/0xranx/golembot/actions/workflows/ci.yml/badge.svg)](https://github.com/0xranx/golembot/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/golembot.svg)](https://www.npmjs.com/package/golembot)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org/)
+<p align="center">
+  <a href="https://github.com/0xranx/golembot/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/0xranx/golembot/ci.yml?branch=main&style=for-the-badge" alt="CI"></a>
+  <a href="https://www.npmjs.com/package/golembot"><img src="https://img.shields.io/npm/v/golembot.svg?style=for-the-badge" alt="npm version"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="MIT License"></a>
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg?style=for-the-badge" alt="Node.js"></a>
+</p>
 
-> **Coding Agent = 灵魂，GolemBot = 泥土之躯。**
->
 > 用你已有的 Coding Agent（Cursor / Claude Code / OpenCode）作为大脑——让它们不止能聊天，还能真正把事情做完。
 
 GolemBot 是一个 TypeScript 库 + CLI，将 Coding Agent CLI 封装为统一的 AI 助手引擎。一条命令即可启动一个连接飞书、钉钉或企业微信的智能助手——本地运行、完全透明、引擎可换。
