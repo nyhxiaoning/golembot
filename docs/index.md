@@ -25,7 +25,7 @@ features:
   - icon:
       src: /icons/plug.svg
     title: Connect Anywhere
-    details: One command to go live on Feishu, DingTalk, WeCom, or HTTP. Or embed in your own product with 5 lines of code. No AI framework required.
+    details: One command for IM channels (Feishu, DingTalk, WeCom) or HTTP. Or import as a library and embed in Express, Next.js, or any Node.js app — 5 lines of code, no AI framework required.
   - icon:
       src: /icons/folder.svg
     title: Directory Is the Assistant

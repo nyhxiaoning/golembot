@@ -81,10 +81,11 @@ for await (const event of assistant.chat('Analyze the sales data')) {
 }
 ```
 
-This pattern works for embedding into Slack bots, internal tools, SaaS products, or any Node.js application. See the [API Reference](/api/create-assistant) for details.
+This pattern works for embedding into Slack bots, internal tools, SaaS products, or any Node.js application. See the [Embed in Your Product](/guide/embed) guide for Express, Next.js, background job, and Slack examples.
 
 ## What's Next
 
+- [Embed in Your Product](/guide/embed) — library integration patterns (Express, Next.js, queues)
 - [Configuration](/guide/configuration) — understand `golem.yaml` and `${ENV_VAR}` placeholders
 - [CLI Commands](/guide/cli-commands) — full command reference
 - [Engines](/engines/overview) — compare Cursor, Claude Code, and OpenCode

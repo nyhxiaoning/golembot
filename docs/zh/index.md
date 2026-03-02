@@ -25,7 +25,7 @@ features:
   - icon:
       src: /icons/plug.svg
     title: 随处接入
-    details: 一条命令接入飞书、钉钉、企业微信或 HTTP。或用 5 行代码嵌入你的产品。无需 AI 框架。
+    details: 一条命令接入飞书、钉钉、企业微信或 HTTP。也可作为库导入，嵌入 Express、Next.js 或任何 Node.js 应用 — 5 行代码，无需 AI 框架。
   - icon:
       src: /icons/folder.svg
     title: 目录即助手

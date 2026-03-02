@@ -81,10 +81,11 @@ for await (const event of assistant.chat('分析销售数据')) {
 }
 ```
 
-这种模式适用于嵌入 Slack 机器人、内部工具、SaaS 产品或任何 Node.js 应用。详见 [API 参考](/zh/api/create-assistant)。
+这种模式适用于嵌入 Slack 机器人、内部工具、SaaS 产品或任何 Node.js 应用。Express、Next.js、后台任务等完整示例见[嵌入到你的产品](/zh/guide/embed)指南。
 
 ## 下一步
 
+- [嵌入到你的产品](/zh/guide/embed) — 库集成模式（Express、Next.js、队列任务）
 - [配置说明](/zh/guide/configuration) — 了解 `golem.yaml` 和 `${ENV_VAR}` 占位符
 - [CLI 命令](/zh/guide/cli-commands) — 完整命令参考
 - [引擎](/zh/engines/overview) — 对比 Cursor、Claude Code 和 OpenCode

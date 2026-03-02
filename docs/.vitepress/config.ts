@@ -5,6 +5,7 @@ const sidebarEn = [
     text: 'Guide',
     items: [
       { text: 'Getting Started', link: '/guide/getting-started' },
+      { text: 'Embed in Your Product', link: '/guide/embed' },
       { text: 'Onboard Wizard', link: '/guide/onboard-wizard' },
       { text: 'Configuration', link: '/guide/configuration' },
       { text: 'CLI Commands', link: '/guide/cli-commands' },
@@ -61,6 +62,7 @@ const sidebarZh = [
     text: '指南',
     items: [
       { text: '快速开始', link: '/zh/guide/getting-started' },
+      { text: '嵌入到你的产品', link: '/zh/guide/embed' },
       { text: '引导向导', link: '/zh/guide/onboard-wizard' },
       { text: '配置说明', link: '/zh/guide/configuration' },
       { text: 'CLI 命令', link: '/zh/guide/cli-commands' },
