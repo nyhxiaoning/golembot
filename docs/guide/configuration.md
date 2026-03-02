@@ -12,6 +12,12 @@ model: claude-sonnet         # optional, preferred model
 # Optional: bypass agent permission prompts
 skipPermissions: true
 
+# Optional: production hardening
+timeout: 120                 # engine timeout in seconds (default: 300)
+maxConcurrent: 20            # max parallel chats (default: 10)
+maxQueuePerSession: 2        # max queued requests per user (default: 3)
+sessionTtlDays: 14           # prune idle sessions after N days (default: 30)
+
 # Optional: IM channel configuration
 channels:
   feishu:
@@ -50,6 +56,10 @@ gateway:
 |-------|------|---------|-------------|
 | `model` | `string` | — | Preferred model. Format varies by engine — see each engine's docs for valid values |
 | `skipPermissions` | `boolean` | `true` | Whether to bypass agent permission prompts |
+| `timeout` | `number` | `300` | Engine invocation timeout in seconds. The underlying CLI process is killed and a `type: 'error'` event is emitted |
+| `maxConcurrent` | `number` | `10` | Maximum number of parallel `chat()` calls across all sessions |
+| `maxQueuePerSession` | `number` | `3` | Maximum number of requests that can be queued per session key |
+| `sessionTtlDays` | `number` | `30` | Sessions not used for this many days are pruned at next startup |
 | `channels` | `object` | — | IM channel configurations |
 | `gateway` | `object` | — | Gateway service settings |
 
@@ -117,6 +127,10 @@ interface GolemConfig {
   engine: string;
   model?: string;
   skipPermissions?: boolean;
+  timeout?: number;             // seconds, default 300
+  maxConcurrent?: number;       // default 10
+  maxQueuePerSession?: number;  // default 3
+  sessionTtlDays?: number;      // default 30
   channels?: {
     feishu?: { appId: string; appSecret: string };
     dingtalk?: { clientId: string; clientSecret: string };

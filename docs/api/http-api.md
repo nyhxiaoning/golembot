@@ -46,6 +46,18 @@ data: {"type":"done","sessionId":"abc-123","durationMs":8500}
 
 Each event is a JSON-encoded [StreamEvent](/api/stream-events).
 
+::: warning Error events in SSE
+The `/chat` endpoint always returns `200 OK` — errors are delivered as events inside the stream:
+
+```
+data: {"type":"error","message":"Server busy: too many concurrent requests (limit: 10). Try again later."}
+data: {"type":"error","message":"Too many pending requests for this session (limit: 3). Try again later."}
+data: {"type":"error","message":"Agent invocation timed out"}
+```
+
+Always check for `type === "error"` in your SSE handler.
+:::
+
 ### `POST /reset`
 
 Clear a session.

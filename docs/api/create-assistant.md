@@ -14,10 +14,13 @@ function createAssistant(opts: CreateAssistantOpts): Assistant;
 
 ```typescript
 interface CreateAssistantOpts {
-  dir: string;        // Path to the assistant directory
-  engine?: string;    // Override engine from golem.yaml
-  model?: string;     // Override model from golem.yaml
-  apiKey?: string;    // Agent API key
+  dir: string;                  // Path to the assistant directory
+  engine?: string;              // Override engine from golem.yaml
+  model?: string;               // Override model from golem.yaml
+  apiKey?: string;              // Agent API key
+  maxConcurrent?: number;       // Max parallel chats across all sessions (default: 10)
+  maxQueuePerSession?: number;  // Max queued requests per sessionKey (default: 3)
+  timeoutMs?: number;           // Engine invocation timeout in ms (default: 300000)
 }
 ```
 
@@ -27,6 +30,9 @@ interface CreateAssistantOpts {
 | `engine` | `string` | No | Override the `engine` field in `golem.yaml`. One of `cursor`, `claude-code`, `opencode` |
 | `model` | `string` | No | Override the `model` field in `golem.yaml` |
 | `apiKey` | `string` | No | API key passed to the engine. Alternatively set via environment variables (`CURSOR_API_KEY`, `ANTHROPIC_API_KEY`, etc.) |
+| `maxConcurrent` | `number` | No | Maximum number of parallel `chat()` calls across all sessions. Excess calls receive an immediate `type: 'error'` event. Default: `10` |
+| `maxQueuePerSession` | `number` | No | Maximum number of requests queued per `sessionKey`. When full, additional requests receive `type: 'error'` instead of waiting. Default: `3` |
+| `timeoutMs` | `number` | No | Engine invocation timeout in milliseconds. Aborts the underlying CLI process and yields a `type: 'error'` event. Default: `300000` (5 min). Can also be set via `timeout` in `golem.yaml` |
 
 ## Assistant Interface
 
@@ -123,6 +129,26 @@ const assistant = createAssistant({
   model: 'anthropic/claude-sonnet',
   apiKey: 'sk-ant-xxx',
 });
+```
+
+### Production: Rate Limiting + Timeout
+
+```typescript
+const assistant = createAssistant({
+  dir: './my-bot',
+  maxConcurrent: 20,       // reject when > 20 parallel chats
+  maxQueuePerSession: 2,   // reject when > 2 queued for the same user
+  timeoutMs: 120_000,      // 2-minute hard timeout per invocation
+});
+
+// Handle error events from rate limiting / timeout
+for await (const event of assistant.chat('Hello', { sessionKey: 'user-1' })) {
+  if (event.type === 'error') {
+    console.error('Chat error:', event.message);
+    break;
+  }
+  if (event.type === 'text') process.stdout.write(event.content);
+}
 ```
 
 ## Re-exports

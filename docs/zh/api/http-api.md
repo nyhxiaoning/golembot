@@ -33,6 +33,18 @@ data: {"type":"done","sessionId":"abc-123","durationMs":8500}
 
 ```
 
+::: warning SSE 中的错误事件
+`/chat` 端点始终返回 `200 OK` — 错误通过流内的事件传递：
+
+```
+data: {"type":"error","message":"Server busy: too many concurrent requests (limit: 10). Try again later."}
+data: {"type":"error","message":"Too many pending requests for this session (limit: 3). Try again later."}
+data: {"type":"error","message":"Agent invocation timed out"}
+```
+
+请在 SSE 处理器中始终检查 `type === "error"`。
+:::
+
 ### `POST /reset`
 
 清除会话。请求体：`{ "sessionKey": "user-123" }`。响应：`{ "ok": true }`。

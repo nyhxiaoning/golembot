@@ -12,6 +12,12 @@ model: claude-sonnet         # 可选，首选模型
 # 可选：跳过 Agent 权限确认
 skipPermissions: true
 
+# 可选：生产可用性配置
+timeout: 120                 # 引擎超时（秒，默认：300）
+maxConcurrent: 20            # 最大并发 chat() 数（默认：10）
+maxQueuePerSession: 2        # 每个用户最大排队数（默认：3）
+sessionTtlDays: 14           # 闲置会话保留天数（默认：30）
+
 # 可选：IM 通道配置
 channels:
   feishu:
@@ -50,6 +56,10 @@ gateway:
 |------|------|--------|------|
 | `model` | `string` | — | 首选模型，格式因引擎而异 — 详见各引擎文档 |
 | `skipPermissions` | `boolean` | `true` | 是否跳过 Agent 权限确认 |
+| `timeout` | `number` | `300` | 引擎调用超时（秒）。超时后 CLI 进程被终止并触发 `type: 'error'` 事件 |
+| `maxConcurrent` | `number` | `10` | 全局最大并发 `chat()` 调用数 |
+| `maxQueuePerSession` | `number` | `3` | 每个 sessionKey 最大排队请求数 |
+| `sessionTtlDays` | `number` | `30` | 闲置会话超过此天数后在下次启动时清理 |
 | `channels` | `object` | — | IM 通道配置 |
 | `gateway` | `object` | — | Gateway 服务设置 |
 
@@ -117,6 +127,10 @@ interface GolemConfig {
   engine: string;
   model?: string;
   skipPermissions?: boolean;
+  timeout?: number;             // 秒，默认 300
+  maxConcurrent?: number;       // 默认 10
+  maxQueuePerSession?: number;  // 默认 3
+  sessionTtlDays?: number;      // 默认 30
   channels?: {
     feishu?: { appId: string; appSecret: string };
     dingtalk?: { clientId: string; clientSecret: string };
