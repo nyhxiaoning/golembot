@@ -18,7 +18,7 @@
 
 ---
 
-Cursor, Claude Code, OpenCode — these Coding Agents can already write code, run scripts, analyze data, and reason through complex tasks. But they're stuck in an IDE or a terminal window.
+Cursor, Claude Code, OpenCode, Codex — these Coding Agents can already write code, run scripts, analyze data, and reason through complex tasks. But they're stuck in an IDE or a terminal window.
 
 **GolemBot gives them a body.** One command connects your Coding Agent to Feishu, DingTalk, WeCom, or any HTTP client. Or embed it into your own product with 5 lines of code. No AI framework, no prompt engineering — the agent you already have *is* the brain.
 
@@ -50,7 +50,7 @@ Embed into Slack bots, internal tools, SaaS products, customer support — anyth
 
 | | GolemBot | Traditional AI Frameworks |
 |---|---|---|
-| **AI brain** | Cursor / Claude Code / OpenCode — battle-tested, full coding ability | You wire up LLM APIs + tools from scratch |
+| **AI brain** | Cursor / Claude Code / OpenCode / Codex — battle-tested, full coding ability | You wire up LLM APIs + tools from scratch |
 | **Setup** | `golembot init` → done | Chains, RAG, vector DB, prompt tuning... |
 | **Auto-upgrade** | Agent gets smarter? Your assistant gets smarter. Zero code changes. | You maintain everything yourself |
 | **Transparency** | `ls` the directory = see what the assistant knows and does | Black box pipelines |
@@ -84,19 +84,19 @@ Feishu / DingTalk / WeCom / HTTP API
              │
      createAssistant()
              │
-     ┌───────┼───────┐
-     ▼       ▼       ▼
-  Cursor  Claude   OpenCode
+     ┌───────┼───────┬───────┐
+     ▼       ▼       ▼       ▼
+  Cursor  Claude  OpenCode  Codex
           Code
 ```
 
 ## Engine Comparison
 
-| | Cursor | Claude Code | OpenCode |
-|---|---|---|---|
-| Skill Injection | `.cursor/skills/` | `.claude/skills/` + CLAUDE.md | `.opencode/skills/` + opencode.json |
-| Session Resume | `--resume` | `--resume` | `--session` |
-| API Key | CURSOR_API_KEY | ANTHROPIC_API_KEY | Depends on Provider |
+| | Cursor | Claude Code | OpenCode | Codex |
+|---|---|---|---|---|
+| Skill Injection | `.cursor/skills/` | `.claude/skills/` + CLAUDE.md | `.opencode/skills/` + opencode.json | `AGENTS.md` at workspace root |
+| Session Resume | `--resume` | `--resume` | `--session` | `exec resume <thread_id>` |
+| API Key | CURSOR_API_KEY | ANTHROPIC_API_KEY | Depends on Provider | OPENAI_API_KEY or ChatGPT OAuth |
 
 The `StreamEvent` interface is identical across all engines — switching requires zero code changes.
 
@@ -158,8 +158,9 @@ git clone https://github.com/0xranx/golembot.git
 cd golembot
 pnpm install
 pnpm run build
-pnpm run test          # Unit tests (600+)
-pnpm run e2e:opencode  # End-to-end tests
+pnpm run test          # Unit tests (676+)
+pnpm run e2e:opencode  # End-to-end tests (OpenCode)
+pnpm run e2e:codex     # End-to-end tests (Codex)
 ```
 
 ## License

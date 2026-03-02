@@ -18,7 +18,7 @@ import { readFileSync } from 'node:fs';
 import { createAssistant, createGolemServer } from '../dist/index.js';
 import { mkdtemp, rm, readdir, readFile, writeFile, mkdir, stat } from 'node:fs/promises';
 import { join, resolve as resolvePath } from 'node:path';
-import { tmpdir } from 'node:os';
+import { tmpdir, homedir } from 'node:os';
 import { existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import http from 'node:http';
@@ -337,13 +337,16 @@ if (!codexBin) {
 }
 
 const apiKey = process.env.OPENAI_API_KEY || process.env.CODEX_API_KEY;
+const oauthFile = join(homedir(), '.codex', 'auth.json');
+const hasOAuth = existsSync(oauthFile);
 
-if (!apiKey) {
-  console.log(`${YELLOW}⏭  No API key found (OPENAI_API_KEY / CODEX_API_KEY), skipping.${RESET}`);
+if (!apiKey && !hasOAuth) {
+  console.log(`${YELLOW}⏭  No auth found. Set OPENAI_API_KEY or run \`codex login\`, skipping.${RESET}`);
   process.exit(0);
 }
 
-const defaultModel = process.env.CODEX_MODEL || 'codex-mini-latest';
+// codex-mini-latest is only available for API key mode; ChatGPT OAuth uses server-selected model.
+const defaultModel: string | undefined = process.env.CODEX_MODEL || (apiKey ? 'codex-mini-latest' : undefined);
 
 console.log(`${CYAN}${BOLD}`);
 console.log(`╔══════════════════════════════════════════════════════════════╗`);
@@ -351,8 +354,8 @@ console.log(`║  GolemBot E2E — Codex engine full real scenario verification 
 console.log(`╚══════════════════════════════════════════════════════════════╝${RESET}`);
 
 info(`Codex CLI: ${codexBin}`);
-info(`Model: ${defaultModel}`);
-info(`API Key: ${apiKey ? apiKey.slice(0, 10) + '...' : '(none)'}`);
+info(`Model: ${defaultModel ?? '(server default — OAuth mode)'}`);
+info(`Auth: ${apiKey ? 'API key (' + apiKey.slice(0, 10) + '...)' : 'ChatGPT OAuth (~/.codex/auth.json)'}`);
 
 // ═══════════════════════════════════════════════════════
 // Main test
@@ -371,6 +374,8 @@ try {
       engine: 'codex',
       model: defaultModel,
       apiKey,
+      // Codex OAuth uses Codex Cloud (WebSocket with retries); allow extra time for cold starts.
+      timeoutMs: 600_000,
     });
   }
 

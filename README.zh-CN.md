@@ -18,7 +18,7 @@
 
 ---
 
-Cursor、Claude Code、OpenCode —— 这些 Coding Agent 已经能写代码、跑脚本、分析数据、进行复杂推理。但它们被困在 IDE 或终端窗口里。
+Cursor、Claude Code、OpenCode、Codex —— 这些 Coding Agent 已经能写代码、跑脚本、分析数据、进行复杂推理。但它们被困在 IDE 或终端窗口里。
 
 **GolemBot 给它们一个身体。** 一条命令就能把你的 Coding Agent 接入飞书、钉钉、企业微信，或任何 HTTP 客户端。也可以 5 行代码嵌入你自己的产品。不需要 AI 框架，不需要 prompt 工程 —— 你已有的 Agent 就是大脑。
 
@@ -50,7 +50,7 @@ for await (const event of bot.chat('分析上个月的销售数据')) {
 
 | | GolemBot | 传统 AI 框架 |
 |---|---|---|
-| **AI 大脑** | Cursor / Claude Code / OpenCode —— 久经考验，完整编码能力 | 你自己从 LLM API + 工具开始拼装 |
+| **AI 大脑** | Cursor / Claude Code / OpenCode / Codex —— 久经考验，完整编码能力 | 你自己从 LLM API + 工具开始拼装 |
 | **上手成本** | `golembot init` → 搞定 | Chains、RAG、向量数据库、prompt 调优…… |
 | **自动升级** | Agent 变强了？你的助手自动变强，零代码改动 | 你自己维护所有东西 |
 | **透明度** | `ls` 目录 = 看到助手知道什么、做了什么 | 黑盒流水线 |
@@ -84,19 +84,19 @@ golembot gateway      # 启动 IM + HTTP 服务
              │
      createAssistant()
              │
-     ┌───────┼───────┐
-     ▼       ▼       ▼
-  Cursor  Claude   OpenCode
+     ┌───────┼───────┬───────┐
+     ▼       ▼       ▼       ▼
+  Cursor  Claude  OpenCode  Codex
           Code
 ```
 
 ## 引擎对比
 
-| | Cursor | Claude Code | OpenCode |
-|---|---|---|---|
-| Skill 注入 | `.cursor/skills/` | `.claude/skills/` + CLAUDE.md | `.opencode/skills/` + opencode.json |
-| 会话恢复 | `--resume` | `--resume` | `--session` |
-| API Key | CURSOR_API_KEY | ANTHROPIC_API_KEY | 取决于 Provider |
+| | Cursor | Claude Code | OpenCode | Codex |
+|---|---|---|---|---|
+| Skill 注入 | `.cursor/skills/` | `.claude/skills/` + CLAUDE.md | `.opencode/skills/` + opencode.json | workspace 根目录的 `AGENTS.md` |
+| 会话恢复 | `--resume` | `--resume` | `--session` | `exec resume <thread_id>` |
+| API Key | CURSOR_API_KEY | ANTHROPIC_API_KEY | 取决于 Provider | OPENAI_API_KEY 或 ChatGPT OAuth |
 
 所有引擎暴露的 `StreamEvent` 接口完全一致 —— 切换引擎无需改任何代码。
 
@@ -158,8 +158,9 @@ git clone https://github.com/0xranx/golembot.git
 cd golembot
 pnpm install
 pnpm run build
-pnpm run test          # 单元测试 (600+)
-pnpm run e2e:opencode  # 端到端测试
+pnpm run test          # 单元测试 (676+)
+pnpm run e2e:opencode  # 端到端测试（OpenCode）
+pnpm run e2e:codex     # 端到端测试（Codex）
 ```
 
 ## 许可证
