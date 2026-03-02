@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { mkdtemp, rm, writeFile, mkdir } from 'node:fs/promises';
+import { mkdtemp, rm, writeFile, mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import http from 'node:http';
@@ -234,5 +234,114 @@ describe('Golem HTTP Server', () => {
       expect(combined).toContain('"type":"error"');
       expect(combined).toContain('shutting down');
     }, 5000);
+  });
+
+  describe('rate limiting', () => {
+    it('returns error SSE event when global concurrency limit is exceeded', async () => {
+      const assistant = createAssistant({ dir, maxConcurrent: 0 });
+      server = createGolemServer(assistant, {});
+      await new Promise<void>(r => server.listen(0, '127.0.0.1', () => r()));
+
+      const res = await request(server, 'POST', '/chat', { message: 'hi' });
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toBe('text/event-stream');
+
+      const events = res.body.split('\n\n').filter(Boolean).map(line => JSON.parse(line.replace('data: ', '')));
+      const errEvt = events.find((e: { type: string; message?: string }) => e.type === 'error');
+      expect(errEvt).toBeDefined();
+      expect(errEvt.message).toMatch(/busy/i);
+    });
+
+    it('returns error SSE event when per-session queue is full', async () => {
+      vi.mocked(createEngine).mockReturnValue({
+        async *invoke(): AsyncIterable<StreamEvent> {
+          await new Promise(r => setTimeout(r, 500)); // hold the session mutex
+          yield { type: 'done', sessionId: 's' };
+        },
+      } as any);
+
+      const assistant = createAssistant({ dir, maxQueuePerSession: 0, maxConcurrent: 10, timeoutMs: 5000 });
+      server = createGolemServer(assistant, {});
+      await new Promise<void>(r => server.listen(0, '127.0.0.1', () => r()));
+
+      const addr = server.address() as { port: number };
+
+      // First request holds the session mutex for 500ms
+      const firstDone = new Promise<void>(resolve => {
+        const req = http.request(
+          { hostname: '127.0.0.1', port: addr.port, path: '/chat', method: 'POST', headers: { 'Content-Type': 'application/json' } },
+          res => { res.resume(); res.on('end', resolve); },
+        );
+        req.write(JSON.stringify({ message: 'first', sessionKey: 'test-sess' }));
+        req.end();
+      });
+
+      // Wait long enough for first request to acquire the mutex
+      await new Promise(r => setTimeout(r, 30));
+
+      // Second request for same session key — queue is full (maxQueuePerSession: 0)
+      const res = await request(server, 'POST', '/chat', { message: 'second', sessionKey: 'test-sess' });
+      const events = res.body.split('\n\n').filter(Boolean).map(line => JSON.parse(line.replace('data: ', '')));
+      const errEvt = events.find((e: { type: string; message?: string }) => e.type === 'error');
+      expect(errEvt).toBeDefined();
+      expect(errEvt.message).toMatch(/pending/i);
+
+      await firstDone;
+    }, 5000);
+  });
+
+  describe('timeout', () => {
+    it('emits error SSE event when engine invocation times out', async () => {
+      vi.mocked(createEngine).mockReturnValue({
+        async *invoke(_p: string, opts: InvokeOpts): AsyncIterable<StreamEvent> {
+          // Hang until the AbortController fires
+          await new Promise<void>(resolve => {
+            if (opts.signal?.aborted) return resolve();
+            opts.signal?.addEventListener('abort', () => resolve(), { once: true });
+          });
+          yield { type: 'error', message: 'Agent invocation timed out' };
+        },
+      } as any);
+
+      const assistant = createAssistant({ dir, timeoutMs: 50 });
+      server = createGolemServer(assistant, {});
+      await new Promise<void>(r => server.listen(0, '127.0.0.1', () => r()));
+
+      const res = await request(server, 'POST', '/chat', { message: 'slow task' });
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toBe('text/event-stream');
+
+      const events = res.body.split('\n\n').filter(Boolean).map(line => JSON.parse(line.replace('data: ', '')));
+      const errEvt = events.find((e: { type: string; message?: string }) => e.type === 'error');
+      expect(errEvt).toBeDefined();
+      expect(errEvt.message).toMatch(/timed out/i);
+    }, 5000);
+  });
+
+  describe('conversation history', () => {
+    beforeEach(() => {
+      // Explicitly reset engine to default to avoid state bleed from other tests
+      vi.mocked(createEngine).mockImplementation(() => ({
+        async *invoke(_p: string, _opts: InvokeOpts): AsyncIterable<StreamEvent> {
+          yield { type: 'text', content: 'hello' };
+          yield { type: 'done', sessionId: 'srv-sess-1' };
+        },
+      }));
+    });
+
+    it('writes history.jsonl after a /chat request', async () => {
+      await startServer();
+      await request(server, 'POST', '/chat', { message: 'hello world', sessionKey: 'http-hist' });
+
+      const raw = await readFile(join(dir, '.golem', 'history.jsonl'), 'utf-8');
+      const lines = raw.trim().split('\n').map(l => JSON.parse(l));
+
+      expect(lines.find((l: { role: string }) => l.role === 'user')).toMatchObject({
+        role: 'user', content: 'hello world', sessionKey: 'http-hist',
+      });
+      expect(lines.find((l: { role: string }) => l.role === 'assistant')).toMatchObject({
+        role: 'assistant', content: 'hello',
+      });
+    });
   });
 });
