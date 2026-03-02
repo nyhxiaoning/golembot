@@ -144,17 +144,31 @@ export async function ensureOpenCodeConfig(workspace: string, model?: string): P
     existing.model = model;
   }
 
-  // Register provider block so OpenCode can authenticate with the chosen provider.
-  // Without this, OpenCode throws ProviderModelNotFoundError even when the env var is set.
+  // Register provider block so OpenCode can authenticate and locate the model.
+  // OpenCode requires both options.apiKey (auth) and models[modelId] (discovery).
+  // Without the models entry, OpenCode throws ProviderModelNotFoundError even when
+  // the env var is set and the apiKey is present.
   if (model) {
-    const providerPrefix = model.split('/')[0];
+    const parts = model.split('/');
+    const providerPrefix = parts[0];
+    const modelId = parts.slice(1).join('/');
     const envVar = providerPrefix ? OPENCODE_PROVIDER_ENV[providerPrefix] : undefined;
-    if (envVar) {
-      const providerConfig = (existing.provider ?? {}) as Record<string, unknown>;
-      if (!providerConfig[providerPrefix]) {
-        providerConfig[providerPrefix] = { options: { apiKey: `{env:${envVar}}` } };
-        existing.provider = providerConfig;
-      }
+    if (envVar && modelId) {
+      const providerMap = (existing.provider ?? {}) as Record<string, unknown>;
+      const entry = (providerMap[providerPrefix] ?? {}) as Record<string, unknown>;
+
+      // Preserve existing apiKey; only set if absent
+      const options = (entry.options ?? {}) as Record<string, unknown>;
+      if (!options.apiKey) options.apiKey = `{env:${envVar}}`;
+      entry.options = options;
+
+      // Register the model; preserve existing model-level config if present
+      const models = (entry.models ?? {}) as Record<string, unknown>;
+      if (!models[modelId]) models[modelId] = {};
+      entry.models = models;
+
+      providerMap[providerPrefix] = entry;
+      existing.provider = providerMap;
     }
   }
 

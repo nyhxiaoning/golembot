@@ -1184,6 +1184,7 @@ describe('ensureOpenCodeConfig', () => {
     const config = JSON.parse(raw);
     expect(config.provider.openrouter).toEqual({
       options: { apiKey: '{env:OPENROUTER_API_KEY}' },
+      models: { 'anthropic/claude-sonnet-4-5': {} },
     });
   });
 
@@ -1194,10 +1195,11 @@ describe('ensureOpenCodeConfig', () => {
     const config = JSON.parse(raw);
     expect(config.provider.anthropic).toEqual({
       options: { apiKey: '{env:ANTHROPIC_API_KEY}' },
+      models: { 'claude-sonnet-4-5': {} },
     });
   });
 
-  it('does not overwrite existing provider config', async () => {
+  it('preserves existing apiKey but still registers missing model entry', async () => {
     await writeFile(
       join(workspace, 'opencode.json'),
       JSON.stringify({ provider: { openrouter: { options: { apiKey: 'hardcoded-key' } } } }),
@@ -1209,6 +1211,23 @@ describe('ensureOpenCodeConfig', () => {
     const raw = await readFile(join(workspace, 'opencode.json'), 'utf-8');
     const config = JSON.parse(raw);
     expect(config.provider.openrouter.options.apiKey).toBe('hardcoded-key');
+    expect(config.provider.openrouter.models['anthropic/claude-sonnet-4-5']).toEqual({});
+  });
+
+  it('preserves existing model-level config when model is already registered', async () => {
+    await writeFile(
+      join(workspace, 'opencode.json'),
+      JSON.stringify({ provider: { openrouter: { models: { 'anthropic/claude-sonnet-4-5': { options: { provider: { order: ['baseten'] } } } } } } }),
+      'utf-8',
+    );
+
+    await ensureOpenCodeConfig(workspace, 'openrouter/anthropic/claude-sonnet-4-5');
+
+    const raw = await readFile(join(workspace, 'opencode.json'), 'utf-8');
+    const config = JSON.parse(raw);
+    expect(config.provider.openrouter.models['anthropic/claude-sonnet-4-5']).toEqual({
+      options: { provider: { order: ['baseten'] } },
+    });
   });
 
   it('skips provider registration for unknown provider prefix', async () => {
