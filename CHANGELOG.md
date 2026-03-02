@@ -1,3 +1,10 @@
+# [0.4.0-beta.3](https://github.com/0xranx/golembot/compare/v0.4.0-beta.2...v0.4.0-beta.3) (2026-03-02)
+
+
+### Bug Fixes
+
+* **feishu:** fallback to any-mention check when bot open_id is unavailable ([7b101e7](https://github.com/0xranx/golembot/commit/7b101e7d3245e30f51112072db39facbece8f3ae))
+
 # [0.4.0-beta.2](https://github.com/0xranx/golembot/compare/v0.4.0-beta.1...v0.4.0-beta.2) (2026-03-02)
 
 
