@@ -28,14 +28,22 @@ export class FeishuAdapter implements ChannelAdapter {
 
     this.client = new lark.Client(baseConfig);
 
-    // Fetch the bot's own open_id so we can filter @mentions in group chats.
+    // Bot's own open_id — fetched lazily and cached. Used to filter @mentions in group chats.
     let botOpenId: string | undefined;
-    try {
-      const botInfo = await this.client.bot.v3.info.get({});
-      botOpenId = (botInfo as any).data?.bot?.open_id;
-    } catch {
-      console.warn('[feishu] Could not fetch bot open_id; group messages will be ignored');
-    }
+    const fetchBotOpenId = async (): Promise<string | undefined> => {
+      if (botOpenId) return botOpenId;
+      try {
+        const botInfo = await this.client.bot.v3.info.get({});
+        botOpenId = (botInfo as any).data?.bot?.open_id;
+        if (botOpenId) console.log(`[feishu] Bot open_id resolved: ${botOpenId}`);
+      } catch {
+        // Will retry on the next group message.
+      }
+      return botOpenId;
+    };
+
+    // Best-effort initial fetch (non-blocking).
+    fetchBotOpenId().catch(() => {});
 
     const eventDispatcher = new lark.EventDispatcher({}).register({
       'im.message.receive_v1': async (data: any) => {
@@ -54,14 +62,14 @@ export class FeishuAdapter implements ChannelAdapter {
 
         // In group chats, only respond when the bot is @mentioned.
         if (chatType === 'group') {
-          if (botOpenId) {
+          const resolvedId = await fetchBotOpenId();
+          if (resolvedId) {
             // Precise check: bot's open_id must appear in the mention list.
-            const isMentioned = content.mentions?.some(m => m.id?.open_id === botOpenId) ?? false;
+            const isMentioned = content.mentions?.some(m => m.id?.open_id === resolvedId) ?? false;
             if (!isMentioned) return;
           } else {
-            // Fallback: if we couldn't fetch the bot's open_id, require at least one mention.
-            const hasMention = (content.mentions?.length ?? 0) > 0;
-            if (!hasMention) return;
+            // Last-resort fallback: require at least one @mention in the message.
+            if ((content.mentions?.length ?? 0) === 0) return;
           }
         }
 
