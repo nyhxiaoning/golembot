@@ -26,16 +26,18 @@ OpenCode uses a `provider/model` format. The provider prefix also determines whi
 opencode models
 ```
 
-**Common values:**
+OpenCode supports 75+ providers via the AI SDK. The canonical source for all valid model strings is **[models.dev](https://models.dev)**.
+
+**Common examples:**
 
 | Model string | Provider | API key env var |
 |---|---|---|
-| `anthropic/claude-sonnet-4-5` | Anthropic | `ANTHROPIC_API_KEY` |
+| `anthropic/claude-sonnet-4-5-20250929` | Anthropic | `ANTHROPIC_API_KEY` |
 | `anthropic/claude-opus-4-5` | Anthropic | `ANTHROPIC_API_KEY` |
+| `openai/gpt-5` | OpenAI | `OPENAI_API_KEY` |
 | `openai/gpt-4o` | OpenAI | `OPENAI_API_KEY` |
-| `openai/o3-mini` | OpenAI | `OPENAI_API_KEY` |
-| `openrouter/anthropic/claude-opus-4-5` | OpenRouter | `OPENROUTER_API_KEY` |
-| `google/gemini-2.5-pro` | Google | `GOOGLE_GENERATIVE_AI_API_KEY` |
+| `openrouter/anthropic/claude-opus-4-6` | OpenRouter | `OPENROUTER_API_KEY` |
+| `google/gemini-2.5-flash` | Google | `GOOGLE_GENERATIVE_AI_API_KEY` |
 | `deepseek/deepseek-chat` | DeepSeek | `DEEPSEEK_API_KEY` |
 | `groq/llama-3.3-70b-versatile` | Groq | `GROQ_API_KEY` |
 

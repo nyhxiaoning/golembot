@@ -18,23 +18,22 @@ model: claude-sonnet-4-5   # optional, see below
 
 ## Choosing a Model
 
-Cursor manages its own model list — the names do **not** follow Anthropic's or OpenAI's naming conventions directly.
+Cursor uses its own model identifiers — they differ from Anthropic/OpenAI official names. See the full list at [cursor.com/docs/models](https://cursor.com/docs/models).
 
-**How to find available model names:**
+**Current models (as of 2025):**
 
-1. Open Cursor → Settings → Models — the exact identifier shown there is what you put in `model`.
-2. Or check the [Cursor model documentation](https://docs.cursor.com/settings/models).
+| Model identifier | Provider |
+|-----------------|----------|
+| `claude-4.6-sonnet` | Anthropic |
+| `claude-4.6-opus` | Anthropic |
+| `claude-4.5-sonnet` | Anthropic |
+| `gpt-5` | OpenAI |
+| `gpt-5-mini` | OpenAI |
+| `gemini-3-pro` | Google |
+| `gemini-2.5-flash` | Google |
+| `composer-1.5` | Cursor |
 
-**Common values:**
-
-| Model | Notes |
-|-------|-------|
-| `claude-sonnet-4-5` | Anthropic Claude Sonnet (via Cursor) |
-| `gpt-4o` | OpenAI GPT-4o |
-| `o3-mini` | OpenAI o3-mini |
-| `gemini-2.5-pro` | Google Gemini 2.5 Pro |
-
-If `model` is omitted, Cursor uses its default model (configured in Cursor settings).
+If `model` is omitted, Cursor uses the default model from its Settings.
 
 **Override at runtime** — pass `model` to `createAssistant()`:
 

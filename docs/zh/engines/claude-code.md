@@ -18,7 +18,7 @@ skipPermissions: true       # 默认：true
 
 ## 选择模型
 
-模型名称为 Anthropic 的 model ID，直接通过 `--model` 传给 `claude` CLI。
+模型名称为 Anthropic model ID，直接通过 `--model` 传给 `claude` CLI。
 
 **列出可用模型：**
 
@@ -26,15 +26,15 @@ skipPermissions: true       # 默认：true
 claude models
 ```
 
-**当前主要模型（2025）：**
+**最新模型：**
 
-| 模型 | 说明 |
-|------|------|
-| `claude-opus-4-5` | 能力最强，速度较慢 |
-| `claude-sonnet-4-6` | 均衡推荐，默认首选 |
-| `claude-haiku-4-5-20251001` | 轻量快速 |
+| Model ID | 别名 | 说明 |
+|----------|------|------|
+| `claude-opus-4-6` | `claude-opus-4-6` | 最强推理能力，适合复杂任务 |
+| `claude-sonnet-4-6` | `claude-sonnet-4-6` | 速度与能力均衡，推荐默认 |
+| `claude-haiku-4-5-20251001` | `claude-haiku-4-5` | 最快，轻量 |
 
-完整列表见 [Anthropic 模型文档](https://docs.anthropic.com/en/docs/about-claude/models)。
+完整列表及最新信息见 [Anthropic 模型文档](https://docs.anthropic.com/en/docs/about-claude/models)。
 
 **运行时覆盖** — 通过 `createAssistant()` 传入：
 

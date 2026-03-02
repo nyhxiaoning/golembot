@@ -19,7 +19,7 @@ skipPermissions: true       # default: true
 
 ## Choosing a Model
 
-Model names are Anthropic's model IDs, passed directly as `--model` to the `claude` CLI.
+Model names are Anthropic model IDs, passed directly as `--model` to the `claude` CLI.
 
 **List available models:**
 
@@ -27,15 +27,15 @@ Model names are Anthropic's model IDs, passed directly as `--model` to the `clau
 claude models
 ```
 
-**Current models (as of 2025):**
+**Latest models:**
 
-| Model | Description |
-|-------|-------------|
-| `claude-opus-4-5` | Most capable, slower |
-| `claude-sonnet-4-6` | Balanced — recommended default |
-| `claude-haiku-4-5-20251001` | Fast and lightweight |
+| Model ID | Alias | Description |
+|----------|-------|-------------|
+| `claude-opus-4-6` | `claude-opus-4-6` | Most capable, best for complex tasks |
+| `claude-sonnet-4-6` | `claude-sonnet-4-6` | Balanced speed and intelligence — recommended |
+| `claude-haiku-4-5-20251001` | `claude-haiku-4-5` | Fastest, lightweight |
 
-See the full list at [Anthropic model documentation](https://docs.anthropic.com/en/docs/about-claude/models).
+See the full and up-to-date list at [Anthropic model documentation](https://docs.anthropic.com/en/docs/about-claude/models).
 
 **Override at runtime** — pass `model` to `createAssistant()`:
 
