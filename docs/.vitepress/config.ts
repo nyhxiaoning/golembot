@@ -53,7 +53,18 @@ const sidebarEn = [
     items: [
       { text: 'FAQ', link: '/faq' },
       { text: 'Architecture', link: '/reference/architecture' },
-      { text: 'Coding CLI Docs', link: '/reference/coding-cli-docs' },
+    ],
+  },
+  {
+    text: 'CLI Field Notes',
+    collapsed: true,
+    items: [
+      { text: 'Overview', link: '/reference/coding-cli-docs' },
+      { text: 'Cursor', link: '/reference/coding-cli-cursor' },
+      { text: 'Claude Code', link: '/reference/coding-cli-claude-code' },
+      { text: 'OpenCode', link: '/reference/coding-cli-opencode' },
+      { text: 'Codex', link: '/reference/coding-cli-codex' },
+      { text: 'Comparison Matrix', link: '/reference/coding-cli-comparison' },
     ],
   },
 ]
@@ -111,7 +122,18 @@ const sidebarZh = [
     items: [
       { text: 'FAQ', link: '/zh/faq' },
       { text: '架构设计', link: '/reference/architecture' },
-      { text: 'Coding CLI 文档', link: '/reference/coding-cli-docs' },
+    ],
+  },
+  {
+    text: 'CLI 字段笔记',
+    collapsed: true,
+    items: [
+      { text: '概览', link: '/reference/coding-cli-docs' },
+      { text: 'Cursor', link: '/reference/coding-cli-cursor' },
+      { text: 'Claude Code', link: '/reference/coding-cli-claude-code' },
+      { text: 'OpenCode', link: '/reference/coding-cli-opencode' },
+      { text: 'Codex', link: '/reference/coding-cli-codex' },
+      { text: '对比矩阵', link: '/reference/coding-cli-comparison' },
     ],
   },
 ]
