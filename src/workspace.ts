@@ -36,6 +36,8 @@ export interface ChannelsConfig {
   wecom?: WecomChannelConfig;
   slack?: SlackChannelConfig;
   telegram?: TelegramChannelConfig;
+  /** Custom channel adapters: any key with `_adapter: <path>` in config. */
+  [key: string]: unknown;
 }
 
 export interface GatewayConfig {

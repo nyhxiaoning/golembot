@@ -25,7 +25,7 @@
 
 Cursor、Claude Code、OpenCode、Codex —— 这些 Coding Agent 已经能写代码、跑脚本、分析数据、进行复杂推理。但它们被困在 IDE 或终端窗口里。
 
-**GolemBot 给它们一个身体。** 一条命令就能把你的 Coding Agent 接入 Slack、Telegram、飞书、钉钉、企业微信，或任何 HTTP 客户端。也可以 5 行代码嵌入你自己的产品。不需要 AI 框架，不需要 prompt 工程 —— 你已有的 Agent 就是大脑。
+**GolemBot 给它们一个身体。** 一条命令就能把你的 Coding Agent 接入 Slack、Telegram、飞书、钉钉、企业微信，或任何 HTTP 客户端。写一个自定义 Adapter 即可接入邮件、Discord、GitHub Issue 等任意消息来源。也可以 5 行代码嵌入你自己的产品。不需要 AI 框架，不需要 prompt 工程 —— 你已有的 Agent 就是大脑。
 
 ## 让你的 Coding Agent 跑在任何地方
 
@@ -79,6 +79,7 @@ golembot gateway      # 启动 IM + HTTP 服务
 
 ```
 Slack / Telegram / 飞书 / 钉钉 / 企业微信 / HTTP API
+     自定义 Adapter（邮件、Discord、GitHub Issue……）
                     │
                     ▼
          ┌─────────────────────────┐
@@ -122,13 +123,17 @@ channels:
   feishu:
     appId: ${FEISHU_APP_ID}
     appSecret: ${FEISHU_APP_SECRET}
+  # 自定义 Adapter —— 本地文件或 npm 包
+  my-email:
+    _adapter: ./adapters/email-adapter.js
+    token: ${EMAIL_TOKEN}
 
 gateway:
   port: 3000
   token: ${GOLEM_TOKEN}
 ```
 
-敏感字段支持 `${ENV_VAR}` 引用环境变量。
+敏感字段支持 `${ENV_VAR}` 引用环境变量。自定义通道 Adapter 可以是本地 `.js`/`.mjs` 文件或 npm 包 —— [查看 Adapter 指南](https://0xranx.github.io/golembot/zh/api/channel-adapter)。
 
 ## Skill 系统
 
@@ -165,7 +170,7 @@ git clone https://github.com/0xranx/golembot.git
 cd golembot
 pnpm install
 pnpm run build
-pnpm run test          # 单元测试 (716+)
+pnpm run test          # 单元测试 (718+)
 pnpm run e2e:opencode  # 端到端测试（OpenCode）
 pnpm run e2e:codex     # 端到端测试（Codex）
 ```

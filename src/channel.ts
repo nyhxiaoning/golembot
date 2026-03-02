@@ -10,7 +10,9 @@ export interface ChannelMessage {
 
 export interface ChannelAdapter {
   readonly name: string;
-  start(onMessage: (msg: ChannelMessage) => void): Promise<void>;
+  /** Optional: override the default 4000-char message split limit for this channel. */
+  readonly maxMessageLength?: number;
+  start(onMessage: (msg: ChannelMessage) => void | Promise<void>): Promise<void>;
   reply(msg: ChannelMessage, text: string): Promise<void>;
   stop(): Promise<void>;
 }

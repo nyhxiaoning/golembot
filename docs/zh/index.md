@@ -25,7 +25,7 @@ features:
   - icon:
       src: /icons/plug.svg
     title: 随处接入
-    details: 一条命令接入 Slack、Telegram、飞书、钉钉、企业微信或 HTTP。也可作为库导入，嵌入 Express、Next.js 或任何 Node.js 应用 — 5 行代码，无需 AI 框架。
+    details: 内置 Slack、Telegram、飞书、钉钉、企业微信、HTTP，无需公网地址。写一个自定义 Adapter 即可接入邮件、Discord、GitHub Issue 或任何消息来源。也可 5 行代码嵌入 Express、Next.js 或任何 Node.js 应用。
   - icon:
       src: /icons/folder.svg
     title: 目录即助手
@@ -92,9 +92,9 @@ for await (const ev of bot.chat('分析上个月的销售数据'))
   </div>
 </div>
 
-## IM 通道
+## 通道
 
-接入团队的聊天平台 — 所有通道均无需公网 URL。
+接入任何消息来源。内置通道无需公网地址。在 `golem.yaml` 里加一行 `_adapter: <path>` 即可接入邮件、Discord、GitHub Issue 等 —— [自定义 Adapter](api/channel-adapter)。
 
 <div class="channels-grid">
   <div class="channel-card">
@@ -132,6 +132,12 @@ for await (const ev of bot.chat('分析上个月的销售数据'))
     <svg class="channel-icon channel-icon-http" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v2a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z"/><path d="M3 15a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v2a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z"/><circle cx="7" cy="8" r=".5" fill="currentColor"/><circle cx="7" cy="16" r=".5" fill="currentColor"/></svg>
     <div class="channel-name">HTTP API</div>
     <div class="channel-transport">SSE</div>
+  </div>
+  <div class="channel-card channel-card-custom">
+    <a class="card-link" href="api/channel-adapter" aria-label="自定义 Adapter"></a>
+    <svg class="channel-icon channel-icon-custom" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+    <div class="channel-name">自定义</div>
+    <div class="channel-transport">_adapter: &lt;path&gt;</div>
   </div>
 </div>
 
@@ -233,6 +239,13 @@ for await (const ev of bot.chat('分析上个月的销售数据'))
 }
 
 .channel-icon-http { color: var(--vp-c-text-2); }
+
+.channel-icon-custom { color: var(--vp-c-brand-1); }
+
+.channel-card-custom {
+  border-style: dashed;
+  border-color: var(--vp-c-brand-soft);
+}
 
 .channel-transport {
   font-size: 13px;

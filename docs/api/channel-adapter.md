@@ -7,16 +7,19 @@ The `ChannelAdapter` interface defines how GolemBot connects to IM platforms.
 ```typescript
 interface ChannelAdapter {
   readonly name: string;
-  start(onMessage: (msg: ChannelMessage) => void): Promise<void>;
+  /** Optional: override the default 4000-char message split limit for this channel. */
+  readonly maxMessageLength?: number;
+  start(onMessage: (msg: ChannelMessage) => void | Promise<void>): Promise<void>;
   reply(msg: ChannelMessage, text: string): Promise<void>;
   stop(): Promise<void>;
 }
 ```
 
-| Method | Description |
-|--------|-------------|
-| `name` | Adapter name (e.g., `'feishu'`, `'dingtalk'`, `'wecom'`) |
-| `start(onMessage)` | Connect to the IM platform and begin listening. Call `onMessage` for each incoming message. |
+| Property / Method | Description |
+|-------------------|-------------|
+| `name` | Adapter name (e.g., `'feishu'`, `'dingtalk'`, `'my-email'`) |
+| `maxMessageLength` | *(optional)* Override the default 4000-char split limit for long replies |
+| `start(onMessage)` | Connect to the platform and begin listening. Call `onMessage` for each incoming message. |
 | `reply(msg, text)` | Send a text reply to the original message |
 | `stop()` | Gracefully disconnect |
 
@@ -59,31 +62,93 @@ Handles:
 - XML-style: `<at user_id="xxx">BotName</at>`
 - Plain text: `@BotName`
 
-## Implementing a Custom Adapter
+## Custom Adapters via golem.yaml
 
-To add a new IM channel, implement the `ChannelAdapter` interface:
+You can plug any message source into GolemBot — email, GitHub Issues, Discord, cron triggers, or anything else — without touching the framework code. Declare a custom channel in `golem.yaml` with an `_adapter` field pointing to your adapter file or npm package:
+
+```yaml
+name: my-assistant
+engine: claude-code
+
+channels:
+  # Built-in channel (unchanged)
+  slack:
+    botToken: ${SLACK_BOT_TOKEN}
+    appToken: ${SLACK_APP_TOKEN}
+
+  # Custom channel — local file (relative to the assistant directory)
+  my-email:
+    _adapter: ./adapters/email-adapter.js
+    host: imap.gmail.com
+    token: ${EMAIL_TOKEN}
+
+  # Custom channel — npm package
+  discord:
+    _adapter: golembot-discord-adapter
+    token: ${DISCORD_TOKEN}
+```
+
+**Path resolution rules:**
+- Starts with `.` or `/` → resolved relative to the assistant directory
+- Anything else → treated as an npm package name (resolved by Node.js module resolution)
+
+### Writing an Adapter
+
+Your adapter file must export a default class that implements the `ChannelAdapter` interface. All config fields from `golem.yaml` are passed to the constructor:
 
 ```typescript
 import type { ChannelAdapter, ChannelMessage } from 'golembot';
 
-class SlackAdapter implements ChannelAdapter {
-  readonly name = 'slack';
+export default class EmailAdapter implements ChannelAdapter {
+  readonly name: string;
+  readonly maxMessageLength = 10000; // optional — overrides the default 4000
 
-  async start(onMessage: (msg: ChannelMessage) => void) {
-    // Connect to Slack via RTM or Events API
-    // On each incoming message, call:
+  constructor(private config: Record<string, unknown>) {
+    this.name = (config.channelName as string) ?? 'email';
+  }
+
+  async start(onMessage: (msg: ChannelMessage) => void | Promise<void>): Promise<void> {
+    // Start listening (IMAP, webhook, polling, etc.)
+    // Call onMessage() for each incoming message:
     onMessage({
-      channelType: 'slack',
-      senderId: event.user,
-      chatId: event.channel,
-      chatType: event.channel_type === 'im' ? 'dm' : 'group',
-      text: event.text,
-      raw: event,
+      channelType: 'email',
+      senderId: email.from,
+      senderName: email.fromName,
+      chatId: email.threadId,
+      chatType: 'dm',
+      text: email.body,
+      raw: email,
     });
   }
 
+  async reply(msg: ChannelMessage, text: string): Promise<void> {
+    // Send the reply (SMTP, API call, etc.)
+  }
+
+  async stop(): Promise<void> {
+    // Clean up connections
+  }
+}
+```
+
+GolemBot handles all message routing, session management, and reply splitting automatically once your adapter is loaded.
+
+## Implementing a Custom Adapter Programmatically
+
+If you're embedding GolemBot in your own application and want to wire up a channel manually (without `golem.yaml`), implement the interface and integrate with `createAssistant()` directly:
+
+```typescript
+import type { ChannelAdapter, ChannelMessage } from 'golembot';
+
+class MyAdapter implements ChannelAdapter {
+  readonly name = 'my-channel';
+
+  async start(onMessage: (msg: ChannelMessage) => void | Promise<void>) {
+    // Connect and call onMessage for each incoming message
+  }
+
   async reply(msg: ChannelMessage, text: string) {
-    // Send reply via Slack API
+    // Send reply
   }
 
   async stop() {
@@ -92,13 +157,11 @@ class SlackAdapter implements ChannelAdapter {
 }
 ```
 
-Then integrate with `createAssistant()` to handle the message routing:
-
 ```typescript
 import { createAssistant, buildSessionKey, stripMention } from 'golembot';
 
 const assistant = createAssistant({ dir: './my-bot' });
-const adapter = new SlackAdapter();
+const adapter = new MyAdapter();
 
 await adapter.start(async (msg) => {
   const sessionKey = buildSessionKey(msg);
@@ -114,10 +177,12 @@ await adapter.start(async (msg) => {
 
 ## Built-in Adapters
 
-| Adapter | Module | SDK |
-|---------|--------|-----|
-| `FeishuAdapter` | `golembot/channels/feishu` | `@larksuiteoapi/node-sdk` |
-| `DingtalkAdapter` | `golembot/channels/dingtalk` | `dingtalk-stream` |
-| `WecomAdapter` | `golembot/channels/wecom` | `@wecom/crypto` + `xml2js` |
+| Adapter | Channel type | SDK |
+|---------|--------------|-----|
+| `FeishuAdapter` | `feishu` | `@larksuiteoapi/node-sdk` |
+| `DingtalkAdapter` | `dingtalk` | `dingtalk-stream` |
+| `WecomAdapter` | `wecom` | `@wecom/crypto` + `xml2js` |
+| `SlackAdapter` | `slack` | `@slack/bolt` |
+| `TelegramAdapter` | `telegram` | `node-telegram-bot-api` |
 
-These are internal to GolemBot and used by the gateway service. They are not currently exported for direct use — use the gateway or implement your own adapter following the interface above.
+These are used internally by the gateway service. To use them, configure the corresponding channel type in `golem.yaml` — no `_adapter` field needed.

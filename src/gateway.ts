@@ -48,6 +48,7 @@ function log(verbose: boolean, ...args: unknown[]): void {
 async function createChannelAdapter(
   type: string,
   channelConfig: Record<string, unknown>,
+  dir: string,
 ): Promise<ChannelAdapter> {
   switch (type) {
     case 'feishu': {
@@ -70,8 +71,29 @@ async function createChannelAdapter(
       const { TelegramAdapter } = await import('./channels/telegram.js');
       return new TelegramAdapter(channelConfig as any);
     }
-    default:
-      throw new Error(`Unknown channel type: ${type}`);
+    default: {
+      const adapterPath = channelConfig._adapter;
+      if (typeof adapterPath !== 'string') {
+        throw new Error(
+          `Unknown channel type "${type}". Add "_adapter: <path or package>" to use a custom adapter.`,
+        );
+      }
+      const resolvedPath =
+        adapterPath.startsWith('.') || adapterPath.startsWith('/')
+          ? resolve(dir, adapterPath)
+          : adapterPath;
+      let mod: any;
+      try {
+        mod = await import(resolvedPath);
+      } catch (e) {
+        throw new Error(`Failed to load custom adapter "${adapterPath}": ${(e as Error).message}`);
+      }
+      const AdapterClass = mod.default ?? mod[Object.keys(mod)[0]];
+      if (typeof AdapterClass !== 'function') {
+        throw new Error(`Custom adapter "${adapterPath}" must export a default class.`);
+      }
+      return new AdapterClass(channelConfig);
+    }
   }
 }
 
@@ -111,7 +133,7 @@ export async function startGateway(opts: GatewayOpts): Promise<void> {
       if (!channelConfig) continue;
 
       try {
-        const adapter = await createChannelAdapter(type, channelConfig);
+        const adapter = await createChannelAdapter(type, channelConfig as Record<string, unknown>, dir);
         await adapter.start(async (msg: ChannelMessage) => {
           const sessionKey = buildSessionKey(msg);
           const userText = msg.chatType === 'group' ? stripMention(msg.text) : msg.text;
@@ -145,7 +167,7 @@ export async function startGateway(opts: GatewayOpts): Promise<void> {
             }
 
             if (reply.trim()) {
-              const maxLen = CHANNEL_LIMITS[type] ?? 4000;
+              const maxLen = adapter.maxMessageLength ?? CHANNEL_LIMITS[type] ?? 4000;
               const chunks = splitMessage(reply.trim(), maxLen);
               for (const chunk of chunks) {
                 await adapter.reply(msg, chunk);

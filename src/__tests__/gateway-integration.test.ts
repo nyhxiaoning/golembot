@@ -133,7 +133,7 @@ describe('gateway integration', () => {
       const adapter = createMockAdapter('test');
       const received: ChannelMessage[] = [];
 
-      await adapter.start((msg) => received.push(msg));
+      await adapter.start((msg) => { received.push(msg); });
 
       const testMsg: ChannelMessage = {
         channelType: 'test',
@@ -157,7 +157,7 @@ describe('gateway integration', () => {
       const adapter = createMockAdapter('test');
       const received: ChannelMessage[] = [];
 
-      await adapter.start((msg) => received.push(msg));
+      await adapter.start((msg) => { received.push(msg); });
       await adapter.stop();
 
       adapter._trigger({
@@ -179,8 +179,8 @@ describe('gateway integration', () => {
       const feishuMsgs: ChannelMessage[] = [];
       const dingtalkMsgs: ChannelMessage[] = [];
 
-      await feishu.start((msg) => feishuMsgs.push(msg));
-      await dingtalk.start((msg) => dingtalkMsgs.push(msg));
+      await feishu.start((msg) => { feishuMsgs.push(msg); });
+      await dingtalk.start((msg) => { dingtalkMsgs.push(msg); });
 
       feishu._trigger({
         channelType: 'feishu',

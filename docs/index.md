@@ -25,7 +25,7 @@ features:
   - icon:
       src: /icons/plug.svg
     title: Connect Anywhere
-    details: One command for IM channels (Slack, Telegram, Feishu, DingTalk, WeCom) or HTTP. Or import as a library and embed in Express, Next.js, or any Node.js app — 5 lines of code, no AI framework required.
+    details: Connect to Slack, Telegram, Feishu, DingTalk, WeCom, or HTTP out of the box — no public URL required. Write a custom adapter to plug in email, Discord, GitHub Issues, or any other source. Or embed as a library in Express, Next.js, or any Node.js app in 5 lines.
   - icon:
       src: /icons/folder.svg
     title: Directory Is the Assistant
@@ -92,9 +92,9 @@ Switch engines by changing one line in `golem.yaml` — the [StreamEvent](/api/s
   </div>
 </div>
 
-## IM Channels
+## Channels
 
-Connect to your team's chat platform — no public URL needed for any channel.
+Connect to any message source. Built-in adapters need no public URL. Add `_adapter: <path>` to `golem.yaml` to plug in email, Discord, GitHub Issues, or anything else — [write your own adapter](api/channel-adapter).
 
 <div class="channels-grid">
   <div class="channel-card">
@@ -132,6 +132,12 @@ Connect to your team's chat platform — no public URL needed for any channel.
     <svg class="channel-icon channel-icon-http" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v2a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z"/><path d="M3 15a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v2a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z"/><circle cx="7" cy="8" r=".5" fill="currentColor"/><circle cx="7" cy="16" r=".5" fill="currentColor"/></svg>
     <div class="channel-name">HTTP API</div>
     <div class="channel-transport">SSE</div>
+  </div>
+  <div class="channel-card channel-card-custom">
+    <a class="card-link" href="api/channel-adapter" aria-label="Custom Adapter"></a>
+    <svg class="channel-icon channel-icon-custom" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+    <div class="channel-name">Custom</div>
+    <div class="channel-transport">_adapter: &lt;path&gt;</div>
   </div>
 </div>
 
@@ -233,6 +239,13 @@ Connect to your team's chat platform — no public URL needed for any channel.
 }
 
 .channel-icon-http { color: var(--vp-c-text-2); }
+
+.channel-icon-custom { color: var(--vp-c-brand-1); }
+
+.channel-card-custom {
+  border-style: dashed;
+  border-color: var(--vp-c-brand-soft);
+}
 
 .channel-transport {
   font-size: 13px;

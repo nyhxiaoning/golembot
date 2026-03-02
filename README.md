@@ -25,7 +25,7 @@
 
 Cursor, Claude Code, OpenCode, Codex — these Coding Agents can already write code, run scripts, analyze data, and reason through complex tasks. But they're stuck in an IDE or a terminal window.
 
-**GolemBot gives them a body.** One command connects your Coding Agent to Slack, Telegram, Feishu, DingTalk, WeCom, or any HTTP client. Or embed it into your own product with 5 lines of code. No AI framework, no prompt engineering — the agent you already have *is* the brain.
+**GolemBot gives them a body.** One command connects your Coding Agent to Slack, Telegram, Feishu, DingTalk, WeCom, or any HTTP client. Write a custom adapter to plug in email, Discord, GitHub Issues, or any other message source. Or embed into your own product with 5 lines of code. No AI framework, no prompt engineering — the agent you already have *is* the brain.
 
 ## Run Your Coding Agent Everywhere
 
@@ -79,6 +79,7 @@ golembot gateway      # start IM + HTTP service
 
 ```
 Slack / Telegram / Feishu / DingTalk / WeCom / HTTP API
+    Custom Adapters (email, Discord, GitHub Issues, ...)
                     │
                     ▼
          ┌─────────────────────────┐
@@ -122,13 +123,17 @@ channels:
   feishu:
     appId: ${FEISHU_APP_ID}
     appSecret: ${FEISHU_APP_SECRET}
+  # Custom adapter — local file or npm package
+  my-email:
+    _adapter: ./adapters/email-adapter.js
+    token: ${EMAIL_TOKEN}
 
 gateway:
   port: 3000
   token: ${GOLEM_TOKEN}
 ```
 
-Sensitive fields support `${ENV_VAR}` references.
+Sensitive fields support `${ENV_VAR}` references. Custom channel adapters can be local `.js`/`.mjs` files or npm packages — [see the adapter guide](https://0xranx.github.io/golembot/api/channel-adapter).
 
 ## Skill System
 
@@ -165,7 +170,7 @@ git clone https://github.com/0xranx/golembot.git
 cd golembot
 pnpm install
 pnpm run build
-pnpm run test          # Unit tests (716+)
+pnpm run test          # Unit tests (718+)
 pnpm run e2e:opencode  # End-to-end tests (OpenCode)
 pnpm run e2e:codex     # End-to-end tests (Codex)
 ```

@@ -7,7 +7,9 @@
 ```typescript
 interface ChannelAdapter {
   readonly name: string;
-  start(onMessage: (msg: ChannelMessage) => void): Promise<void>;
+  /** 可选：覆盖该 channel 的默认消息分割长度限制（默认 4000 字符）。 */
+  readonly maxMessageLength?: number;
+  start(onMessage: (msg: ChannelMessage) => void | Promise<void>): Promise<void>;
   reply(msg: ChannelMessage, text: string): Promise<void>;
   stop(): Promise<void>;
 }
@@ -37,29 +39,101 @@ interface ChannelMessage {
 
 移除消息中的 `@` 提及，处理 `<at ...>...</at>` XML 格式和 `@BotName` 纯文本格式。
 
-## 实现自定义适配器
+## 通过 golem.yaml 配置自定义 Adapter
+
+不需要修改框架代码，任何消息源（邮件、GitHub Issue、Discord、Cron 触发等）都可以接入 GolemBot。在 `golem.yaml` 里声明自定义 channel，并用 `_adapter` 字段指向你的适配器文件或 npm 包：
+
+```yaml
+name: my-assistant
+engine: claude-code
+
+channels:
+  # 内置 channel（无需 _adapter）
+  slack:
+    botToken: ${SLACK_BOT_TOKEN}
+    appToken: ${SLACK_APP_TOKEN}
+
+  # 自定义 channel — 本地文件（相对 assistant 目录解析）
+  my-email:
+    _adapter: ./adapters/email-adapter.js
+    host: imap.gmail.com
+    token: ${EMAIL_TOKEN}
+
+  # 自定义 channel — npm 包
+  discord:
+    _adapter: golembot-discord-adapter
+    token: ${DISCORD_TOKEN}
+```
+
+**路径解析规则：**
+- 以 `.` 或 `/` 开头 → 相对 assistant 目录解析
+- 其他情况 → 视为 npm 包名，由 Node.js 负责解析
+
+### 编写 Adapter
+
+Adapter 文件需要 `export default` 一个实现 `ChannelAdapter` 接口的类。`golem.yaml` 中的所有配置字段都会作为构造函数参数传入：
+
+```typescript
+import type { ChannelAdapter, ChannelMessage } from 'golembot';
+
+export default class EmailAdapter implements ChannelAdapter {
+  readonly name: string;
+  readonly maxMessageLength = 10000; // 可选，覆盖默认的 4000 字符限制
+
+  constructor(private config: Record<string, unknown>) {
+    this.name = (config.channelName as string) ?? 'email';
+  }
+
+  async start(onMessage: (msg: ChannelMessage) => void | Promise<void>): Promise<void> {
+    // 开始监听（IMAP、Webhook、轮询等）
+    // 收到消息时调用 onMessage：
+    onMessage({
+      channelType: 'email',
+      senderId: email.from,
+      senderName: email.fromName,
+      chatId: email.threadId,
+      chatType: 'dm',
+      text: email.body,
+      raw: email,
+    });
+  }
+
+  async reply(msg: ChannelMessage, text: string): Promise<void> {
+    // 发送回复（SMTP、API 调用等）
+  }
+
+  async stop(): Promise<void> {
+    // 清理连接资源
+  }
+}
+```
+
+Adapter 加载后，GolemBot 自动处理消息路由、Session 管理和长消息分割，无需额外配置。
+
+## 在代码中手动集成 Adapter
+
+如果你是在自己的应用里嵌入 GolemBot，也可以不通过 `golem.yaml`，直接实现接口并配合 `createAssistant()` 使用：
 
 ```typescript
 import type { ChannelAdapter, ChannelMessage } from 'golembot';
 import { createAssistant, buildSessionKey, stripMention } from 'golembot';
 
-class SlackAdapter implements ChannelAdapter {
-  readonly name = 'slack';
+class MyAdapter implements ChannelAdapter {
+  readonly name = 'my-channel';
 
-  async start(onMessage: (msg: ChannelMessage) => void) {
-    // 连接 Slack，收到消息时调用 onMessage
+  async start(onMessage: (msg: ChannelMessage) => void | Promise<void>) {
+    // 连接并监听，收到消息时调用 onMessage
   }
 
   async reply(msg: ChannelMessage, text: string) {
-    // 通过 Slack API 发送回复
+    // 发送回复
   }
 
   async stop() { /* 断开连接 */ }
 }
 
-// 使用
 const assistant = createAssistant({ dir: './my-bot' });
-const adapter = new SlackAdapter();
+const adapter = new MyAdapter();
 
 await adapter.start(async (msg) => {
   let reply = '';
@@ -71,3 +145,15 @@ await adapter.start(async (msg) => {
   await adapter.reply(msg, reply);
 });
 ```
+
+## 内置 Adapter
+
+| Adapter | Channel 类型 | SDK |
+|---------|-------------|-----|
+| `FeishuAdapter` | `feishu` | `@larksuiteoapi/node-sdk` |
+| `DingtalkAdapter` | `dingtalk` | `dingtalk-stream` |
+| `WecomAdapter` | `wecom` | `@wecom/crypto` + `xml2js` |
+| `SlackAdapter` | `slack` | `@slack/bolt` |
+| `TelegramAdapter` | `telegram` | `node-telegram-bot-api` |
+
+内置 Adapter 由 gateway 服务内部使用。在 `golem.yaml` 里配置对应的 channel 类型即可，无需写 `_adapter` 字段。
