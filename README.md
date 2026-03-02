@@ -8,6 +8,7 @@
 </p>
 
 <p align="center">
+  <a href="https://0xranx.github.io/golembot/"><img src="https://img.shields.io/badge/docs-0xranx.github.io%2Fgolembot-blue?style=for-the-badge" alt="Documentation"></a>
   <a href="https://github.com/0xranx/golembot/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/0xranx/golembot/ci.yml?branch=main&style=for-the-badge" alt="CI"></a>
   <a href="https://www.npmjs.com/package/golembot"><img src="https://img.shields.io/npm/v/golembot.svg?style=for-the-badge" alt="npm version"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="MIT License"></a>
