@@ -1,3 +1,10 @@
+# [0.4.0-beta.4](https://github.com/0xranx/golembot/compare/v0.4.0-beta.3...v0.4.0-beta.4) (2026-03-02)
+
+
+### Bug Fixes
+
+* **feishu:** lazy-retry bot open_id fetch on each group message until resolved ([96e202a](https://github.com/0xranx/golembot/commit/96e202aa43db2295bfa64cf45c6bc0c3f3c98605))
+
 # [0.4.0-beta.3](https://github.com/0xranx/golembot/compare/v0.4.0-beta.2...v0.4.0-beta.3) (2026-03-02)
 
 
