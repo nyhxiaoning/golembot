@@ -174,8 +174,8 @@ Note: Codex Cloud tasks are only available with ChatGPT auth, not API key.
 
 | Variable | Purpose |
 |----------|---------|
-| `OPENAI_API_KEY` | Primary API key for API-auth mode |
-| `CODEX_API_KEY` | Alternate accepted by CI/CD docs |
+| `CODEX_API_KEY` | Primary env var for API-auth mode (official CI docs) |
+| `OPENAI_API_KEY` | Also accepted; set both for maximum compatibility |
 | `OPENAI_BASE_URL` | Override API endpoint (proxy / Azure) |
 | `CODEX_HOME` | Override default `~/.codex` state directory |
 
@@ -265,7 +265,8 @@ Models as of early 2026 (subject to change; check https://developers.openai.com/
 
 | Model ID | Description |
 |----------|-------------|
-| `codex-1` | o3-based, tuned for software engineering (initial release model) |
+| `5.3-codex` | Latest full-size model; visible to API users since Feb 2026 |
+| `codex-1` | Original o3-based release model, tuned for software engineering |
 | `codex-mini-latest` | o4-mini-based, low-latency, cost-effective (API key mode only) |
 
 Switching model:

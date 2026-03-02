@@ -134,7 +134,12 @@ export class CodexEngine implements AgentEngine {
       : ['exec', ...sharedFlags, ...modelFlag, prompt];
 
     const env: Record<string, string> = { ...process.env as Record<string, string> };
-    if (opts.apiKey) env.OPENAI_API_KEY = opts.apiKey;
+    if (opts.apiKey) {
+      // CODEX_API_KEY is the primary env var per official CI docs;
+      // also set OPENAI_API_KEY for backward compatibility with older CLI versions.
+      env.CODEX_API_KEY = opts.apiKey;
+      env.OPENAI_API_KEY = opts.apiKey;
+    }
 
     const child = spawn(bin, args, {
       cwd: opts.workspace,

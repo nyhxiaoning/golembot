@@ -39,16 +39,17 @@ GolemBot automatically uses the stored credentials — no extra configuration ne
 For CI/CD, scripts, or programmatic access:
 
 ```bash
-export OPENAI_API_KEY=sk-...
+export CODEX_API_KEY=sk-...          # primary env var for Codex CLI (per official CI docs)
+# OPENAI_API_KEY is also accepted for compatibility with older versions
 
 # Or pre-login with the key (stored in ~/.codex/auth.json):
-printenv OPENAI_API_KEY | codex login --with-api-key
+printenv CODEX_API_KEY | codex login --with-api-key
 ```
 
 Pass via `createAssistant()` or `golem.yaml`:
 
 ```typescript
-const bot = createAssistant({ dir: './my-bot', apiKey: process.env.OPENAI_API_KEY })
+const bot = createAssistant({ dir: './my-bot', apiKey: process.env.CODEX_API_KEY })
 ```
 
 ## Choosing a Model
@@ -63,8 +64,9 @@ codex models
 
 | Model | Description |
 |-------|-------------|
-| `codex-mini-latest` | Fast, cost-efficient coding model |
-| `o4-mini` | OpenAI o4-mini reasoning model |
+| `5.3-codex` | Latest full-size Codex model (visible to API users since Feb 2026) |
+| `codex-mini-latest` | Fast, cost-efficient coding model (o4-mini-based) |
+| `codex-1` | Original o3-based release model |
 
 **Override at runtime** — pass `model` to `createAssistant()`:
 

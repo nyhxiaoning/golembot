@@ -39,16 +39,17 @@ GolemBot 会自动使用存储的凭据，无需额外配置。
 适用于 CI/CD、脚本或程序化访问：
 
 ```bash
-export OPENAI_API_KEY=sk-...
+export CODEX_API_KEY=sk-...          # Codex CLI 官方 CI 文档指定的主要环境变量
+# OPENAI_API_KEY 同样被接受，兼容旧版本
 
 # 或预先使用 key 登录（存储在 ~/.codex/auth.json）：
-printenv OPENAI_API_KEY | codex login --with-api-key
+printenv CODEX_API_KEY | codex login --with-api-key
 ```
 
 通过 `createAssistant()` 或 `golem.yaml` 传入：
 
 ```typescript
-const bot = createAssistant({ dir: './my-bot', apiKey: process.env.OPENAI_API_KEY })
+const bot = createAssistant({ dir: './my-bot', apiKey: process.env.CODEX_API_KEY })
 ```
 
 ## 选择模型
@@ -63,8 +64,9 @@ codex models
 
 | 模型 | 说明 |
 |------|------|
-| `codex-mini-latest` | 快速、低成本编程模型 |
-| `o4-mini` | OpenAI o4-mini 推理模型 |
+| `5.3-codex` | 最新全尺寸 Codex 模型（2026 年 2 月起对 API 用户可见） |
+| `codex-mini-latest` | 快速、低成本编程模型（基于 o4-mini） |
+| `codex-1` | 基于 o3 的初始版本模型 |
 
 **运行时覆盖** — 通过 `createAssistant()` 传入 `model`：
 
