@@ -12,7 +12,7 @@ golembot init [-e <engine>] [-n <name>]
 
 | 选项 | 说明 | 默认值 |
 |------|------|--------|
-| `-e, --engine <engine>` | 引擎类型 | `cursor` |
+| `-e, --engine <engine>` | 引擎类型（`cursor`、`claude-code`、`opencode`、`codex`） | `cursor` |
 | `-n, --name <name>` | 助手名称 | 交互式提示 |
 
 ## `golembot run`

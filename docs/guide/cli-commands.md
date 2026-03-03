@@ -12,7 +12,7 @@ golembot init [-e <engine>] [-n <name>]
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| `-e, --engine <engine>` | Engine type (`cursor`, `claude-code`, `opencode`) | `cursor` |
+| `-e, --engine <engine>` | Engine type (`cursor`, `claude-code`, `opencode`, `codex`) | `cursor` |
 | `-n, --name <name>` | Assistant name | Interactive prompt |
 
 Creates `golem.yaml`, `skills/` (with built-in skills), `AGENTS.md`, `.golem/`, and `.gitignore`.

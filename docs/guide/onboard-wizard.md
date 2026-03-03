@@ -37,6 +37,8 @@ Multi-select which IM platforms to connect (optional):
 - DingTalk
 - WeCom (WeChat Work)
 
+> **Note**: Slack, Telegram, and Discord are not offered by the wizard (they require additional setup steps best done manually). After the wizard completes, add them to `golem.yaml` — see the [channel docs](/channels/overview) for each platform's configuration.
+
 ### Steps 4–5: Configure Channel Credentials
 
 For each selected channel, the wizard prompts for the required credentials:

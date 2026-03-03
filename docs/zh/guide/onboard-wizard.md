@@ -37,6 +37,8 @@ golembot onboard --template customer-support
 - 钉钉
 - 企业微信
 
+> **说明**：Slack、Telegram 和 Discord 不在向导中提供（它们的初始配置步骤更适合手动完成）。向导完成后，直接在 `golem.yaml` 中添加即可——参见各平台的[通道文档](/zh/channels/overview)。
+
 ### 第 4–5 步：配置通道凭据
 
 为每个选中的通道填写所需凭据：
