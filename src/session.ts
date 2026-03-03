@@ -10,6 +10,7 @@ const DEFAULT_KEY = 'default';
 interface SessionEntry {
   engineSessionId: string;
   lastUsed: number; // unix ms
+  engineType?: string; // e.g. "opencode", "claude-code", "cursor", "codex"
 }
 
 type SessionStore = Record<string, SessionEntry>;
@@ -55,15 +56,28 @@ async function writeStore(dir: string, store: SessionStore): Promise<void> {
   await writeFile(sessionPath(dir), JSON.stringify(store, null, 2) + '\n', 'utf-8');
 }
 
-export async function loadSession(dir: string, key?: string): Promise<string | undefined> {
+export async function loadSession(
+  dir: string,
+  key?: string,
+  engineType?: string,
+): Promise<string | undefined> {
   const store = await readStore(dir);
   const entry = store[key || DEFAULT_KEY];
-  return entry?.engineSessionId || undefined;
+  if (!entry) return undefined;
+  // Invalidate session if it was saved by a different engine type to prevent
+  // cross-engine session ID contamination (e.g. claude-code UUID passed to opencode).
+  if (engineType && entry.engineType && entry.engineType !== engineType) return undefined;
+  return entry.engineSessionId || undefined;
 }
 
-export async function saveSession(dir: string, sessionId: string, key?: string): Promise<void> {
+export async function saveSession(
+  dir: string,
+  sessionId: string,
+  key?: string,
+  engineType?: string,
+): Promise<void> {
   const store = await readStore(dir);
-  store[key || DEFAULT_KEY] = { engineSessionId: sessionId, lastUsed: Date.now() };
+  store[key || DEFAULT_KEY] = { engineSessionId: sessionId, lastUsed: Date.now(), engineType };
   await writeStore(dir, store);
 }
 

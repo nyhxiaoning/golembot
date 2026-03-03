@@ -193,7 +193,7 @@ export async function handleMessage(
   msg: ChannelMessage,
   config: GolemConfig,
   assistant: Pick<Assistant, 'chat'>,
-  adapter: Pick<ChannelAdapter, 'reply' | 'maxMessageLength'>,
+  adapter: Pick<ChannelAdapter, 'reply' | 'maxMessageLength' | 'typing'>,
   channelType: string,
   verbose: boolean,
   dir: string,
@@ -254,6 +254,14 @@ export async function handleMessage(
     `[${channelType}] received from ${msg.senderName || msg.senderId}: "${userText}" → session ${sessionKey}`,
   );
 
+  // Send typing indicator immediately, then refresh every 4s while waiting for AI.
+  // Telegram's typing action expires after ~5s, so we keep it alive.
+  let typingTimer: ReturnType<typeof setInterval> | undefined;
+  if (adapter.typing) {
+    adapter.typing(msg).catch(() => {});
+    typingTimer = setInterval(() => adapter.typing!(msg).catch(() => {}), 4000);
+  }
+
   try {
     let reply = '';
     let hasError = false;
@@ -304,6 +312,8 @@ export async function handleMessage(
     } catch {
       // best effort
     }
+  } finally {
+    if (typingTimer !== undefined) clearInterval(typingTimer);
   }
 }
 

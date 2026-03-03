@@ -17,7 +17,11 @@ npm install grammy
 
 1. 打开 Telegram，搜索 [@BotFather](https://t.me/BotFather) 并发送消息。
 2. 发送 `/newbot`，按提示操作，完成后会收到一个 **Bot Token**，格式为 `123456:ABCdef...`。
-3. 若需要在群组中使用，发送 `/setprivacy` → 选择你的 Bot → 选择 **Disable**（允许 Bot 读取群组消息）。
+3. **群组 @mention 必须执行**：向 @BotFather 发送 `/setprivacy` → 选择你的 Bot → 选择 **Disable**，以允许 Bot 接收群组消息。
+
+::: warning Privacy mode 对已有群组不立即生效
+关闭 privacy mode 后，仅对**之后加入**的群组生效。对于已经在其中的群组，需要**先将 Bot 移出群组，再重新邀请**，新设置才会生效。
+:::
 
 ## 配置 golem.yaml
 

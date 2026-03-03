@@ -118,7 +118,7 @@ export function createAssistant(opts: CreateAssistantOpts): Assistant {
     const model = modelOverride || config.model;
     const engine: AgentEngine = createEngine(engineType);
 
-    const sessionId = await loadSession(dir, sessionKey);
+    const sessionId = await loadSession(dir, sessionKey, engineType);
     const skillPaths = skills.map(s => s.path);
 
     // Prune once per process
@@ -184,7 +184,7 @@ export function createAssistant(opts: CreateAssistantOpts): Assistant {
     }).catch(() => {});
 
     if (lastSessionId) {
-      await saveSession(dir, lastSessionId, sessionKey);
+      await saveSession(dir, lastSessionId, sessionKey, engineType);
     }
 
     if (gotError && sessionId && !isRetry) {

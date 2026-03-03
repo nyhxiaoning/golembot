@@ -21,6 +21,12 @@ export interface ChannelAdapter {
   start(onMessage: (msg: ChannelMessage) => void | Promise<void>): Promise<void>;
   reply(msg: ChannelMessage, text: string): Promise<void>;
   stop(): Promise<void>;
+  /**
+   * Optional: send a "typing…" indicator to the chat.
+   * Called before a long-running AI invocation so the user sees immediate feedback.
+   * Implementations should be idempotent and best-effort (errors are ignored).
+   */
+  typing?(msg: ChannelMessage): Promise<void>;
 }
 
 export function buildSessionKey(msg: ChannelMessage): string {

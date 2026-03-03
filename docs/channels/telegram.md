@@ -17,7 +17,11 @@ npm install grammy
 
 1. Open Telegram and message [@BotFather](https://t.me/BotFather).
 2. Send `/newbot` and follow the prompts. You'll receive a **Bot Token** in the format `123456:ABCdef...`.
-3. To use the bot in groups, send `/setprivacy` → select your bot → **Disable** (allows the bot to read group messages).
+3. **Required for group @mention support**: send `/setprivacy` to @BotFather → select your bot → **Disable**. This allows the bot to receive group messages.
+
+::: warning Privacy mode affects existing groups
+After disabling privacy mode, the change only applies to groups the bot joins **after** the change. For groups the bot is already in, you must **remove the bot and re-invite it** for the new setting to take effect.
+:::
 
 ## Configure golem.yaml
 
