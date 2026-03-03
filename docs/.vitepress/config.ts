@@ -31,6 +31,7 @@ const sidebarEn = [
       { text: 'WeCom', link: '/channels/wecom' },
       { text: 'Slack', link: '/channels/slack' },
       { text: 'Telegram', link: '/channels/telegram' },
+      { text: 'Discord', link: '/channels/discord' },
     ],
   },
   {
@@ -102,6 +103,7 @@ const sidebarZh = [
       { text: '企业微信', link: '/zh/channels/wecom' },
       { text: 'Slack', link: '/zh/channels/slack' },
       { text: 'Telegram', link: '/zh/channels/telegram' },
+      { text: 'Discord', link: '/zh/channels/discord' },
     ],
   },
   {

@@ -10,7 +10,8 @@ GolemBot's gateway connects your assistant to IM platforms. Each platform is han
 | [DingTalk](/channels/dingtalk) | Stream (WebSocket) | No | `dingtalk-stream` |
 | [WeCom](/channels/wecom) | Webhook HTTP | **Yes** | `@wecom/crypto` + `xml2js` |
 | [Slack](/channels/slack) | Socket Mode (WebSocket) | No | `@slack/bolt` |
-| [Telegram](/channels/telegram) | Long-polling | No | `node-telegram-bot-api` |
+| [Telegram](/channels/telegram) | Long-polling | No | `grammy` |
+| [Discord](/channels/discord) | Gateway WebSocket | No | `discord.js` |
 | Custom | Any | Depends | Your own adapter class |
 
 ## Architecture
@@ -38,6 +39,7 @@ Each platform has a maximum message length. GolemBot automatically splits long r
 | WeCom | 2,048 chars | Multi-message |
 | Slack | 4,000 chars | Multi-message |
 | Telegram | 4,096 chars | Multi-message |
+| Discord | 2,000 chars | Multi-message |
 | Custom | Configurable via `maxMessageLength` | Multi-message |
 
 ## Session Routing
@@ -176,7 +178,10 @@ pnpm add @wecom/crypto xml2js
 pnpm add @slack/bolt
 
 # Telegram
-pnpm add node-telegram-bot-api
+pnpm add grammy
+
+# Discord
+pnpm add discord.js
 ```
 
 If a configured channel's SDK is not installed, the gateway will print an error with installation instructions.

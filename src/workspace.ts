@@ -30,12 +30,23 @@ export interface TelegramChannelConfig {
   botToken: string;
 }
 
+export interface DiscordChannelConfig {
+  botToken: string;
+  /**
+   * Set to the same value as golem.yaml `name` to enable @mention detection
+   * in Discord servers (guild channels). Without this, the gateway can't tell
+   * if the bot was @mentioned and will fall back to policy defaults.
+   */
+  botName?: string;
+}
+
 export interface ChannelsConfig {
   feishu?: FeishuChannelConfig;
   dingtalk?: DingtalkChannelConfig;
   wecom?: WecomChannelConfig;
   slack?: SlackChannelConfig;
   telegram?: TelegramChannelConfig;
+  discord?: DiscordChannelConfig;
   /** Custom channel adapters: any key with `_adapter: <path>` in config. */
   [key: string]: unknown;
 }

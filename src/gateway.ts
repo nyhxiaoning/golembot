@@ -148,6 +148,10 @@ async function createChannelAdapter(
       const { TelegramAdapter } = await import('./channels/telegram.js');
       return new TelegramAdapter(channelConfig as any);
     }
+    case 'discord': {
+      const { DiscordAdapter } = await import('./channels/discord.js');
+      return new DiscordAdapter(channelConfig as any);
+    }
     default: {
       const adapterPath = channelConfig._adapter;
       if (typeof adapterPath !== 'string') {
@@ -186,6 +190,16 @@ export async function startGateway(opts: GatewayOpts): Promise<void> {
     maxQueuePerSession: config.maxQueuePerSession,
     timeoutMs: config.timeout ? config.timeout * 1000 : undefined,
   });
+
+  // Wrap resetSession so that POST /reset also clears the gateway's in-memory
+  // group state (history buffer, turn counter, last-activity timestamp).
+  const _originalReset = assistant.resetSession.bind(assistant);
+  assistant.resetSession = async (sessionKey: string) => {
+    groupHistories.delete(sessionKey);
+    groupTurnCounters.delete(sessionKey);
+    groupLastActivity.delete(sessionKey);
+    return _originalReset(sessionKey);
+  };
 
   const gatewayConfig = config.gateway || {};
   const port = opts.port ?? gatewayConfig.port ?? 3000;
