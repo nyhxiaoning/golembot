@@ -32,19 +32,14 @@ Give your assistant a descriptive name (e.g., `sales-analyst`, `team-helper`).
 
 ### Step 3: Select IM Channels
 
-GolemBot supports 6 IM platforms. The wizard provides interactive credential setup for:
+Multi-select which IM platforms to connect (optional). All 6 platforms are supported:
 
-- **Feishu (Lark)** — App ID + App Secret
-- **DingTalk** — Client ID + Client Secret
-- **WeCom (WeChat Work)** — Corp ID + Agent ID + Secret + Token + Encoding AES Key
-
-The following platforms are also fully supported but require manual configuration in `golem.yaml` after the wizard completes:
-
-- **Slack** — Bot Token + App-Level Token (Socket Mode)
-- **Telegram** — Bot Token
-- **Discord** — Bot Token + Bot Name
-
-See the [Channels](/channels/overview) docs for setup instructions for each platform.
+- **Feishu (Lark)** — WebSocket, no public IP needed
+- **DingTalk** — Stream mode, no public IP needed
+- **WeCom (WeChat Work)** — Webhook, requires public URL
+- **Slack** — Socket Mode, no public IP needed
+- **Telegram** — Polling, no public IP needed
+- **Discord** — Gateway API, no public IP needed
 
 ### Steps 4–5: Configure Channel Credentials
 
@@ -53,6 +48,9 @@ For each selected channel, the wizard prompts for the required credentials:
 - **Feishu**: App ID + App Secret
 - **DingTalk**: Client ID + Client Secret
 - **WeCom**: Corp ID + Agent ID + Secret + Token + Encoding AES Key
+- **Slack**: Bot Token + App-Level Token
+- **Telegram**: Bot Token
+- **Discord**: Bot Token
 
 All credentials are stored in `.env` with `${ENV_VAR}` references in `golem.yaml`.
 

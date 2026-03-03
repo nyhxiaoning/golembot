@@ -52,6 +52,22 @@ export function generateEnvExample(engine: string, channels: string[]): string {
     lines.push('# WECOM_ENCODING_AES_KEY=xxx');
     lines.push('');
   }
+  if (channels.includes('slack')) {
+    lines.push('# Slack');
+    lines.push('# SLACK_BOT_TOKEN=xoxb-...');
+    lines.push('# SLACK_APP_TOKEN=xapp-...');
+    lines.push('');
+  }
+  if (channels.includes('telegram')) {
+    lines.push('# Telegram');
+    lines.push('# TELEGRAM_BOT_TOKEN=xxx:xxx');
+    lines.push('');
+  }
+  if (channels.includes('discord')) {
+    lines.push('# Discord');
+    lines.push('# DISCORD_BOT_TOKEN=xxx');
+    lines.push('');
+  }
 
   lines.push('# Gateway');
   lines.push('# GOLEM_TOKEN=your-auth-token');
@@ -146,6 +162,9 @@ export async function runOnboard(opts: { dir?: string; template?: string } = {})
       { name: 'Feishu / Lark (WebSocket, no public IP needed)', value: 'feishu' },
       { name: 'DingTalk (Stream, no public IP needed)', value: 'dingtalk' },
       { name: 'WeCom (Webhook, public URL required)', value: 'wecom' },
+      { name: 'Slack (Socket Mode, no public IP needed)', value: 'slack' },
+      { name: 'Telegram (Polling, no public IP needed)', value: 'telegram' },
+      { name: 'Discord (Gateway, no public IP needed)', value: 'discord' },
     ],
   }]);
 
@@ -210,6 +229,52 @@ export async function runOnboard(opts: { dir?: string; template?: string } = {})
       envLines.push(`WECOM_SECRET=${wcAnswer.secret}`);
       envLines.push(`WECOM_TOKEN=${wcAnswer.token}`);
       envLines.push(`WECOM_ENCODING_AES_KEY=${wcAnswer.encodingAESKey}`);
+    }
+  }
+
+  if (channels.includes('slack')) {
+    console.log('\n📱 Slack config (get tokens at: https://api.slack.com/apps)');
+    const slackAnswer = await inquirer.default.prompt([
+      { type: 'password', name: 'botToken', message: 'Bot Token (xoxb-...):', mask: '*', default: '' },
+      { type: 'password', name: 'appToken', message: 'App-Level Token (xapp-...):', mask: '*', default: '' },
+    ]);
+
+    if (slackAnswer.botToken) {
+      channelsConfig.slack = {
+        botToken: '${SLACK_BOT_TOKEN}',
+        appToken: '${SLACK_APP_TOKEN}',
+      };
+      envLines.push(`SLACK_BOT_TOKEN=${slackAnswer.botToken}`);
+      envLines.push(`SLACK_APP_TOKEN=${slackAnswer.appToken}`);
+    }
+  }
+
+  if (channels.includes('telegram')) {
+    console.log('\n📱 Telegram config (create a bot at: https://t.me/BotFather)');
+    const tgAnswer = await inquirer.default.prompt([
+      { type: 'password', name: 'botToken', message: 'Bot Token:', mask: '*', default: '' },
+    ]);
+
+    if (tgAnswer.botToken) {
+      channelsConfig.telegram = {
+        botToken: '${TELEGRAM_BOT_TOKEN}',
+      };
+      envLines.push(`TELEGRAM_BOT_TOKEN=${tgAnswer.botToken}`);
+    }
+  }
+
+  if (channels.includes('discord')) {
+    console.log('\n📱 Discord config (create a bot at: https://discord.com/developers/applications)');
+    const dcAnswer = await inquirer.default.prompt([
+      { type: 'password', name: 'botToken', message: 'Bot Token:', mask: '*', default: '' },
+    ]);
+
+    if (dcAnswer.botToken) {
+      channelsConfig.discord = {
+        botToken: '${DISCORD_BOT_TOKEN}',
+        botName: name,
+      };
+      envLines.push(`DISCORD_BOT_TOKEN=${dcAnswer.botToken}`);
     }
   }
 
