@@ -32,13 +32,19 @@ golembot onboard --template customer-support
 
 ### 第 3 步：选择 IM 通道
 
-多选要接入的 IM 平台（可选）：
+GolemBot 支持 6 个 IM 平台。向导可交互配置以下平台的凭据：
 
-- 飞书
-- 钉钉
-- 企业微信
+- **飞书（Lark）** — App ID + App Secret
+- **钉钉** — Client ID + Client Secret
+- **企业微信** — Corp ID + Agent ID + Secret + Token + Encoding AES Key
 
-> **说明**：Slack、Telegram 和 Discord 不在向导中提供（它们的初始配置步骤更适合手动完成）。向导完成后，直接在 `golem.yaml` 中添加即可——参见各平台的[通道文档](/zh/channels/overview)。
+以下平台同样完整支持，但需要在向导完成后手动编辑 `golem.yaml` 配置：
+
+- **Slack** — Bot Token + App-Level Token（Socket Mode）
+- **Telegram** — Bot Token
+- **Discord** — Bot Token + Bot Name
+
+各平台详细配置方法见[通道文档](/zh/channels/overview)。
 
 ### 第 4–5 步：配置通道凭据
 
