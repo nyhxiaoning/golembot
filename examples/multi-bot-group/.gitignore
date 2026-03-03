@@ -1,0 +1,17 @@
+# opencode runtime artifacts
+bot-a/.opencode/
+bot-a/AGENTS.md
+bot-a/opencode.json
+bot-a/.golem/
+bot-b/.opencode/
+bot-b/AGENTS.md
+bot-b/opencode.json
+bot-b/.golem/
+
+# agent-written files
+bot-a/memory/
+bot-b/memory/
+bot-a/*.js
+bot-b/*.js
+bot-a/*.py
+bot-b/*.py
