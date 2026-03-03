@@ -59,12 +59,32 @@ describe('onboard', () => {
       expect(result).toContain('WECOM_ENCODING_AES_KEY');
     });
 
-    it('includes all channel env vars when all channels are selected', () => {
-      const result = generateEnvExample('claude-code', ['feishu', 'dingtalk', 'wecom']);
+    it('includes Slack env vars when slack is selected', () => {
+      const result = generateEnvExample('cursor', ['slack']);
+      expect(result).toContain('SLACK_BOT_TOKEN');
+      expect(result).toContain('SLACK_APP_TOKEN');
+    });
+
+    it('includes Telegram env var when telegram is selected', () => {
+      const result = generateEnvExample('cursor', ['telegram']);
+      expect(result).toContain('TELEGRAM_BOT_TOKEN');
+    });
+
+    it('includes Discord env var when discord is selected', () => {
+      const result = generateEnvExample('cursor', ['discord']);
+      expect(result).toContain('DISCORD_BOT_TOKEN');
+    });
+
+    it('includes all channel env vars when all 6 channels are selected', () => {
+      const result = generateEnvExample('claude-code', ['feishu', 'dingtalk', 'wecom', 'slack', 'telegram', 'discord']);
       expect(result).toContain('ANTHROPIC_API_KEY');
       expect(result).toContain('FEISHU_APP_ID');
       expect(result).toContain('DINGTALK_CLIENT_ID');
       expect(result).toContain('WECOM_CORP_ID');
+      expect(result).toContain('SLACK_BOT_TOKEN');
+      expect(result).toContain('SLACK_APP_TOKEN');
+      expect(result).toContain('TELEGRAM_BOT_TOKEN');
+      expect(result).toContain('DISCORD_BOT_TOKEN');
       expect(result).toContain('GOLEM_TOKEN');
     });
   });
