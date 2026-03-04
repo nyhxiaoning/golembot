@@ -1,3 +1,10 @@
+## [0.8.6](https://github.com/0xranx/golembot/compare/v0.8.5...v0.8.6) (2026-03-04)
+
+
+### Bug Fixes
+
+* add Codex to onboard/init, fix model examples and doctor hint ([bb82f73](https://github.com/0xranx/golembot/commit/bb82f7337df6af4f61a012edf6240cce4a0be91a))
+
 ## [0.8.5](https://github.com/0xranx/golembot/compare/v0.8.4...v0.8.5) (2026-03-04)
 
 
