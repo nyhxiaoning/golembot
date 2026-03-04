@@ -1,7 +1,72 @@
 import { resolve, join } from 'node:path';
+import { existsSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { writeFile, mkdir, stat, readFile, readdir, cp } from 'node:fs/promises';
 import { createAssistant } from './index.js';
 import type { GolemConfig, ChannelsConfig } from './workspace.js';
+
+// ── Engine auth detection ────────────────────────────────
+
+interface EngineAuthInfo {
+  envVar: string;            // primary env var name
+  envVarHint: string;        // placeholder hint (e.g. 'sk-ant-...')
+  loginCmd?: string;         // CLI login command, if supported
+  loginDetail?: string;      // description of login auth
+}
+
+const ENGINE_AUTH: Record<string, EngineAuthInfo> = {
+  'claude-code': {
+    envVar: 'ANTHROPIC_API_KEY',
+    envVarHint: 'sk-ant-...',
+    loginCmd: 'claude auth login',
+    loginDetail: 'Anthropic OAuth',
+  },
+  codex: {
+    envVar: 'CODEX_API_KEY',
+    envVarHint: 'sk-...',
+    loginCmd: 'codex login',
+    loginDetail: 'ChatGPT OAuth (~/.codex/auth.json)',
+  },
+  cursor: {
+    envVar: 'CURSOR_API_KEY',
+    envVarHint: 'crsr_...',
+    loginCmd: 'agent login',
+    loginDetail: 'Cursor CLI login',
+  },
+  opencode: {
+    envVar: 'OPENROUTER_API_KEY',
+    envVarHint: 'sk-or-...',
+    loginCmd: 'opencode auth login',
+    loginDetail: 'OpenCode auth (~/.local/share/opencode/auth.json)',
+  },
+};
+
+function detectEngineAuth(engine: string): { ok: boolean; detail: string } {
+  if (engine === 'codex') {
+    if (process.env.CODEX_API_KEY) return { ok: true, detail: 'CODEX_API_KEY' };
+    if (process.env.OPENAI_API_KEY) return { ok: true, detail: 'OPENAI_API_KEY' };
+    const oauthFile = join(homedir(), '.codex', 'auth.json');
+    if (existsSync(oauthFile)) return { ok: true, detail: 'ChatGPT OAuth (~/.codex/auth.json)' };
+    return { ok: false, detail: '' };
+  }
+  if (engine === 'claude-code') {
+    if (process.env.ANTHROPIC_API_KEY) return { ok: true, detail: 'ANTHROPIC_API_KEY' };
+    return { ok: false, detail: '' };
+  }
+  if (engine === 'cursor') {
+    if (process.env.CURSOR_API_KEY) return { ok: true, detail: 'CURSOR_API_KEY' };
+    return { ok: false, detail: '' };
+  }
+  if (engine === 'opencode') {
+    const keys = ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'OPENROUTER_API_KEY'];
+    const found = keys.find(k => !!process.env[k]);
+    if (found) return { ok: true, detail: found };
+    const authFile = join(homedir(), '.local', 'share', 'opencode', 'auth.json');
+    if (existsSync(authFile)) return { ok: true, detail: 'OpenCode auth (~/.local/share/opencode/auth.json)' };
+    return { ok: false, detail: '' };
+  }
+  return { ok: false, detail: '' };
+}
 
 interface TemplateInfo {
   name: string;
@@ -26,6 +91,8 @@ export function generateEnvExample(engine: string, channels: string[]): string {
     lines.push('# ANTHROPIC_API_KEY=sk-ant-...');
   } else if (engine === 'opencode') {
     lines.push('# OPENROUTER_API_KEY=sk-or-...');
+  } else if (engine === 'codex') {
+    lines.push('# CODEX_API_KEY=sk-...');
   } else {
     lines.push('# CURSOR_API_KEY=crsr_...');
   }
@@ -137,7 +204,7 @@ export async function runOnboard(opts: { dir?: string; template?: string } = {})
   const { engine } = await inquirer.default.prompt([{
     type: 'list',
     name: 'engine',
-    message: '1/7 Select AI engine:',
+    message: '1/8 Select AI engine:',
     choices: [
       { name: 'Cursor', value: 'cursor' },
       { name: 'Claude Code', value: 'claude-code' },
@@ -146,19 +213,67 @@ export async function runOnboard(opts: { dir?: string; template?: string } = {})
     ],
   }]);
 
-  // Step 2: Name
+  // Step 2: Engine authentication
+  const envLines: string[] = [];
+  const auth = detectEngineAuth(engine);
+  const authMeta = ENGINE_AUTH[engine];
+
+  if (auth.ok) {
+    console.log(`\n   ✓ Engine authenticated: ${auth.detail}\n`);
+  } else if (authMeta) {
+    // Build choices: login option (if available) + API key + skip
+    const authChoices: Array<{ name: string; value: string }> = [];
+    if (authMeta.loginCmd) {
+      authChoices.push({
+        name: `Already logged in (ran \`${authMeta.loginCmd}\`)`,
+        value: 'logged-in',
+      });
+    }
+    authChoices.push({ name: `Enter ${authMeta.envVar}`, value: 'apikey' });
+    authChoices.push({ name: 'Skip (configure later)', value: 'skip' });
+
+    const { authChoice } = await inquirer.default.prompt([{
+      type: 'list',
+      name: 'authChoice',
+      message: `2/8 Engine authentication:`,
+      choices: authChoices,
+    }]);
+
+    if (authChoice === 'apikey') {
+      const { apiKey } = await inquirer.default.prompt([{
+        type: 'password',
+        name: 'apiKey',
+        message: `${authMeta.envVar}:`,
+        mask: '*',
+      }]);
+      if (apiKey) {
+        envLines.push(`${authMeta.envVar}=${apiKey}`);
+        console.log(`   ✓ ${authMeta.envVar} saved to .env\n`);
+      }
+    } else if (authChoice === 'logged-in') {
+      console.log(`   ✓ Using ${authMeta.loginDetail}\n`);
+    } else {
+      console.log(`   ⚠ Remember to authenticate before starting the gateway\n`);
+      if (authMeta.loginCmd) {
+        console.log(`     Run: ${authMeta.loginCmd}`);
+      }
+      console.log(`     Or set ${authMeta.envVar} in .env\n`);
+    }
+  }
+
+  // Step 3: Name
   const { name } = await inquirer.default.prompt([{
     type: 'input',
     name: 'name',
-    message: '2/7 Name your assistant:',
+    message: '3/8 Name your assistant:',
     default: 'my-assistant',
   }]);
 
-  // Step 3: IM channels
+  // Step 4: IM channels
   const { channels } = await inquirer.default.prompt([{
     type: 'checkbox',
     name: 'channels',
-    message: '3/7 Select IM channels to connect (multi-select, press Enter to skip):',
+    message: '4/8 Select IM channels to connect (multi-select, press Enter to skip):',
     choices: [
       { name: 'Feishu / Lark (WebSocket, no public IP needed)', value: 'feishu' },
       { name: 'DingTalk (Stream, no public IP needed)', value: 'dingtalk' },
@@ -169,9 +284,8 @@ export async function runOnboard(opts: { dir?: string; template?: string } = {})
     ],
   }]);
 
-  // Step 4-5: Channel config
+  // Step 5-6: Channel config
   const channelsConfig: ChannelsConfig = {};
-  const envLines: string[] = [];
 
   if (channels.includes('feishu')) {
     console.log('\n📱 Feishu config (get credentials at: https://open.feishu.cn/app)');
@@ -279,13 +393,13 @@ export async function runOnboard(opts: { dir?: string; template?: string } = {})
     }
   }
 
-  // Step 6: Template
+  // Step 7: Template
   let templateName: string | undefined = opts.template;
   if (!templateName) {
     const { template } = await inquirer.default.prompt([{
       type: 'list',
       name: 'template',
-      message: '6/7 Choose a scenario template:',
+      message: '7/8 Choose a scenario template:',
       choices: [
         ...TEMPLATES.map(t => ({ name: `${t.label} — ${t.description}`, value: t.name })),
         { name: 'None (built-in skills only)', value: '' },
@@ -294,7 +408,7 @@ export async function runOnboard(opts: { dir?: string; template?: string } = {})
     templateName = template || undefined;
   }
 
-  // Step 7: Generate files
+  // Step 8: Generate files
   console.log('\n📝 Generating config files...\n');
 
   const config: GolemConfig = { name, engine };
@@ -370,11 +484,11 @@ export async function runOnboard(opts: { dir?: string; template?: string } = {})
   }
   console.log(`   Directory: ${dir}`);
 
-  // Step 8: Start?
+  // Start?
   const { start } = await inquirer.default.prompt([{
     type: 'confirm',
     name: 'start',
-    message: '7/7 Start the Gateway now?',
+    message: '8/8 Start the Gateway now?',
     default: true,
   }]);
 

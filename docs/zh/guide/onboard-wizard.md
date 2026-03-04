@@ -1,6 +1,6 @@
 # 引导向导
 
-`golembot onboard` 命令提供 7 步交互式向导，从零开始设置新助手。
+`golembot onboard` 命令提供 8 步交互式向导，从零开始设置新助手。
 
 ## 用法
 
@@ -15,7 +15,7 @@ golembot onboard
 golembot onboard --template customer-support
 ```
 
-## 7 个步骤
+## 8 个步骤
 
 ### 第 1 步：选择引擎
 
@@ -26,11 +26,26 @@ golembot onboard --template customer-support
 - **opencode** — OpenCode CLI（多 Provider 支持）
 - **codex** — OpenAI Codex CLI
 
-### 第 2 步：命名助手
+### 第 2 步：引擎鉴权
+
+向导会检测所选引擎是否已完成鉴权（环境变量或 CLI 登录）。如未鉴权，可选择：
+
+- **输入 API Key** — 自动保存到 `.env`
+- **确认已通过 CLI 登录** — 适用于支持浏览器 OAuth 的引擎（`claude auth login`、`codex login`、`agent login`）
+- **跳过** — 之后再配置（向导会提示你）
+
+| 引擎 | API Key | CLI 登录 |
+|------|---------|----------|
+| Cursor | `CURSOR_API_KEY` | `agent login` |
+| Claude Code | `ANTHROPIC_API_KEY` | `claude auth login` |
+| OpenCode | 取决于 Provider | — |
+| Codex | `CODEX_API_KEY` | `codex login` |
+
+### 第 3 步：命名助手
 
 给助手一个描述性名称（如 `sales-analyst`、`team-helper`）。
 
-### 第 3 步：选择 IM 通道
+### 第 4 步：选择 IM 通道
 
 多选要接入的 IM 平台（可选）。全部 6 个平台均支持：
 
@@ -41,7 +56,7 @@ golembot onboard --template customer-support
 - **Telegram** — 轮询模式，无需公网 IP
 - **Discord** — Gateway API，无需公网 IP
 
-### 第 4–5 步：配置通道凭据
+### 第 5–6 步：配置通道凭据
 
 为每个选中的通道填写所需凭据：
 
@@ -54,7 +69,7 @@ golembot onboard --template customer-support
 
 所有凭据存储在 `.env` 中，`golem.yaml` 使用 `${ENV_VAR}` 引用。
 
-### 第 6 步：选择场景模板
+### 第 7 步：选择场景模板
 
 从 6 个预置模板中选择，或选择**不使用模板**：
 
@@ -72,7 +87,7 @@ golembot onboard --template customer-support
 
 如果没有合适的模板，可以在这里跳过，之后自定义技能 — 在 `skills/` 下新建目录并放一个 `SKILL.md` 文件即可。详见[创建技能](/zh/skills/create-skill)。
 
-### 第 7 步：生成并启动
+### 第 8 步：生成并启动
 
 向导生成：
 

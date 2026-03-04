@@ -1,6 +1,6 @@
 # Onboard Wizard
 
-The `golembot onboard` command provides a 7-step interactive wizard for setting up a new assistant from scratch.
+The `golembot onboard` command provides an 8-step interactive wizard for setting up a new assistant from scratch.
 
 ## Usage
 
@@ -15,7 +15,7 @@ Or skip interactivity with the `--template` flag:
 golembot onboard --template customer-support
 ```
 
-## The 7 Steps
+## The 8 Steps
 
 ### Step 1: Select Engine
 
@@ -26,11 +26,26 @@ Choose your Coding Agent backend:
 - **opencode** — OpenCode CLI (multi-provider support)
 - **codex** — OpenAI Codex CLI
 
-### Step 2: Name Your Assistant
+### Step 2: Engine Authentication
+
+The wizard checks whether the selected engine is already authenticated (via environment variable or CLI login). If not, you can:
+
+- **Enter an API key** — saved to `.env` automatically
+- **Confirm CLI login** — for engines that support browser-based OAuth (`claude auth login`, `codex login`, `agent login`)
+- **Skip** — configure later (the wizard will remind you)
+
+| Engine | API Key | CLI Login |
+|--------|---------|-----------|
+| Cursor | `CURSOR_API_KEY` | `agent login` |
+| Claude Code | `ANTHROPIC_API_KEY` | `claude auth login` |
+| OpenCode | Depends on provider | — |
+| Codex | `CODEX_API_KEY` | `codex login` |
+
+### Step 3: Name Your Assistant
 
 Give your assistant a descriptive name (e.g., `sales-analyst`, `team-helper`).
 
-### Step 3: Select IM Channels
+### Step 4: Select IM Channels
 
 Multi-select which IM platforms to connect (optional). All 6 platforms are supported:
 
@@ -41,7 +56,7 @@ Multi-select which IM platforms to connect (optional). All 6 platforms are suppo
 - **Telegram** — Polling, no public IP needed
 - **Discord** — Gateway API, no public IP needed
 
-### Steps 4–5: Configure Channel Credentials
+### Steps 5–6: Configure Channel Credentials
 
 For each selected channel, the wizard prompts for the required credentials:
 
@@ -54,7 +69,7 @@ For each selected channel, the wizard prompts for the required credentials:
 
 All credentials are stored in `.env` with `${ENV_VAR}` references in `golem.yaml`.
 
-### Step 6: Choose a Scenario Template
+### Step 7: Choose a Scenario Template
 
 Select from 6 pre-built templates, or choose **None** to skip:
 
@@ -74,7 +89,7 @@ If no template fits your scenario, skip here and create a custom skill later —
 
 Each template includes a tailored `golem.yaml`, skill directory, and supporting files.
 
-### Step 7: Generate & Launch
+### Step 8: Generate & Launch
 
 The wizard generates:
 

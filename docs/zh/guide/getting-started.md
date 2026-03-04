@@ -3,11 +3,13 @@
 ## 前置条件
 
 - **Node.js** >= 18
-- 安装一个 Coding Agent CLI：
-  - [Cursor](https://docs.cursor.com/agent)（`agent` CLI）
-  - [Claude Code](https://docs.anthropic.com/en/docs/claude-code)（`claude` CLI）
-  - [OpenCode](https://github.com/opencode-ai/opencode)（`opencode` CLI）
-  - [Codex](https://developers.openai.com/codex/cli)（`codex` CLI）
+- 安装一个 Coding Agent CLI **并完成鉴权**：
+  - [Cursor](https://docs.cursor.com/agent)（`agent` CLI）— 运行 `agent login` 或设置 `CURSOR_API_KEY`
+  - [Claude Code](https://docs.anthropic.com/en/docs/claude-code)（`claude` CLI）— 运行 `claude auth login` 或设置 `ANTHROPIC_API_KEY`
+  - [OpenCode](https://github.com/opencode-ai/opencode)（`opencode` CLI）— 设置对应 Provider 的 API Key（如 `ANTHROPIC_API_KEY`）
+  - [Codex](https://developers.openai.com/codex/cli)（`codex` CLI）— 运行 `codex login` 或设置 `CODEX_API_KEY`
+
+`golembot onboard` 向导会自动检测已有鉴权，未鉴权时引导你完成配置。也可以随时运行 `golembot doctor` 检查配置状态。
 
 ## 安装
 

@@ -3,11 +3,13 @@
 ## Prerequisites
 
 - **Node.js** >= 18
-- A Coding Agent CLI installed:
-  - [Cursor](https://docs.cursor.com/agent) (`agent` CLI)
-  - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (`claude` CLI)
-  - [OpenCode](https://github.com/opencode-ai/opencode) (`opencode` CLI)
-  - [Codex](https://developers.openai.com/codex/cli) (`codex` CLI)
+- A Coding Agent CLI installed **and authenticated**:
+  - [Cursor](https://docs.cursor.com/agent) (`agent` CLI) — run `agent login` or set `CURSOR_API_KEY`
+  - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (`claude` CLI) — run `claude auth login` or set `ANTHROPIC_API_KEY`
+  - [OpenCode](https://github.com/opencode-ai/opencode) (`opencode` CLI) — set API key for your provider (e.g. `ANTHROPIC_API_KEY`)
+  - [Codex](https://developers.openai.com/codex/cli) (`codex` CLI) — run `codex login` or set `CODEX_API_KEY`
+
+The `golembot onboard` wizard will detect existing authentication and guide you through setup if needed. You can also run `golembot doctor` at any time to verify your configuration.
 
 ## Install
 
