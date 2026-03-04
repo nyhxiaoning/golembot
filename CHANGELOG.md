@@ -1,3 +1,10 @@
+## [0.8.4](https://github.com/0xranx/golembot/compare/v0.8.3...v0.8.4) (2026-03-04)
+
+
+### Bug Fixes
+
+* add typing indicator, maxMessageLength, senderName to adapters ([209051b](https://github.com/0xranx/golembot/commit/209051bfb540e5099d3867b903268d89fdd84963))
+
 ## [0.8.3](https://github.com/0xranx/golembot/compare/v0.8.2...v0.8.3) (2026-03-04)
 
 
