@@ -24,6 +24,7 @@ skills/
    - Cursor: `.cursor/skills/`
    - Claude Code: `.claude/skills/`
    - OpenCode: `.opencode/skills/`
+   - Codex: `.agents/skills/`
 4. The Coding Agent reads the skill instructions and gains the described capabilities
 
 ## SKILL.md Format
@@ -57,7 +58,7 @@ The `name` and `description` from the frontmatter are used in `AGENTS.md` (auto-
 - **No config declaration** — the `skills/` directory is the single source of truth. Whatever is in it, the assistant has those capabilities.
 - **No separate Tool concept** — scripts live inside the Skill directory, and `SKILL.md` describes how to invoke them. Coding Agents can natively execute any script.
 - **Drop in, drop out** — add a skill by copying a directory in; remove it by deleting the directory.
-- **Engine-agnostic** — the same Skill works across Cursor, Claude Code, and OpenCode.
+- **Engine-agnostic** — the same Skill works across Cursor, Claude Code, OpenCode, and Codex.
 
 ## Managing Skills
 

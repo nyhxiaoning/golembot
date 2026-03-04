@@ -50,10 +50,10 @@ Cursor vs Claude Code vs OpenCode vs Codex — side-by-side reference for all Go
 
 | Dimension | Cursor Agent | Claude Code | OpenCode | Codex CLI |
 |-----------|-------------|-------------|----------|-----------|
-| Skill path | `.cursor/skills/` | `.claude/skills/` | `.opencode/skills/` + `.claude/skills/` + `.agents/skills/` | No dedicated skill path |
+| Skill path | `.cursor/skills/` | `.claude/skills/` | `.opencode/skills/` + `.claude/skills/` + `.agents/skills/` | `.agents/skills/` |
 | Rules file | `.cursor/rules/*.mdc` | `CLAUDE.md` | `AGENTS.md` (preferred) / `CLAUDE.md` | `AGENTS.md` (auto-discovered root → cwd) |
 | Rules fallback config | Not supported | Not supported | Not supported | `project_doc_fallback_filenames` in `config.toml` |
-| Skill format | `SKILL.md` | `SKILL.md` | `SKILL.md` (with frontmatter) | No dedicated format (embed in AGENTS.md) |
+| Skill format | `SKILL.md` | `SKILL.md` | `SKILL.md` (with frontmatter) | `SKILL.md` (in `.agents/skills/`) + `AGENTS.md` |
 | On-demand loading | Yes (Agent auto) | Yes (Agent auto) | Yes (via `skill()` tool) | Not applicable |
 | Global skills | `~/.cursor/skills/` | `~/.claude/skills/` | `~/.config/opencode/skills/` | `~/.codex/AGENTS.md` |
 
@@ -76,7 +76,7 @@ Cursor vs Claude Code vs OpenCode vs Codex — side-by-side reference for all Go
 |-----------|-------------|-----------------|----------------|-------------|
 | Spawn method | `child_process.spawn` | `child_process.spawn` | `child_process.spawn` | `child_process.spawn` |
 | Parser function | `parseStreamLine()` | `parseClaudeStreamLine()` | `parseOpenCodeStreamLine()` | `parseCodexStreamLine()` |
-| Skill injection | symlink → `.cursor/skills/` | symlink → `.claude/skills/` + `CLAUDE.md` | symlink → `.opencode/skills/` | `AGENTS.md` at workspace root |
+| Skill injection | symlink → `.cursor/skills/` | symlink → `.claude/skills/` + `CLAUDE.md` | symlink → `.opencode/skills/` | symlink → `.agents/skills/` + `AGENTS.md` |
 | Config generation | `.cursor/cli.json` | `CLAUDE.md` | `opencode.json` | `~/.codex/config.toml` (optional) |
 | API Key injection | `CURSOR_API_KEY` | `ANTHROPIC_API_KEY` | Provider-specific env var | `OPENAI_API_KEY` |
 | Session ID source | `done` event `sessionId` field | `done` event `sessionId` field | `done` event `sessionId` field | `thread.started` event `thread_id` field |

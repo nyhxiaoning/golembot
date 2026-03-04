@@ -1505,28 +1505,74 @@ describe('parseCodexStreamLine', () => {
 });
 
 // ═══════════════════════════════════════════════════════
-// injectCodexSkills — no-op (AGENTS.md managed by workspace)
+// injectCodexSkills — symlinks skills to .agents/skills/
 // ═══════════════════════════════════════════════════════
 
 describe('injectCodexSkills', () => {
   let workspace: string;
+  let skillSrc: string;
 
   beforeEach(async () => {
     workspace = await mkdtemp(join(tmpdir(), 'golem-test-codex-inject-'));
+    skillSrc = await mkdtemp(join(tmpdir(), 'golem-test-codex-skillsrc-'));
   });
 
   afterEach(async () => {
     await rm(workspace, { recursive: true, force: true });
+    await rm(skillSrc, { recursive: true, force: true });
   });
 
-  it('resolves without error (no-op)', async () => {
-    await expect(injectCodexSkills(workspace, [])).resolves.toBeUndefined();
+  it('creates .agents/skills/ with symlinks', async () => {
+    const skill1 = join(skillSrc, 'general');
+    const skill2 = join(skillSrc, 'devops');
+    await mkdir(skill1, { recursive: true });
+    await mkdir(skill2, { recursive: true });
+
+    await injectCodexSkills(workspace, [skill1, skill2]);
+
+    const agentsSkills = join(workspace, '.agents', 'skills');
+    const entries = await readdir(agentsSkills);
+    expect(entries.sort()).toEqual(['devops', 'general']);
+
+    const target1 = await readlink(join(agentsSkills, 'general'));
+    expect(target1).toBe(skill1);
   });
 
-  it('does not create any directories or files', async () => {
-    const before = await readdir(workspace).catch(() => []);
-    await injectCodexSkills(workspace, ['/fake/skill/path']);
-    const after = await readdir(workspace).catch(() => []);
-    expect(after).toEqual(before);
+  it('cleans old symlinks before re-injecting', async () => {
+    const skillA = join(skillSrc, 'alpha');
+    const skillB = join(skillSrc, 'beta');
+    await mkdir(skillA, { recursive: true });
+    await mkdir(skillB, { recursive: true });
+
+    await injectCodexSkills(workspace, [skillA]);
+    let entries = await readdir(join(workspace, '.agents', 'skills'));
+    expect(entries).toEqual(['alpha']);
+
+    await injectCodexSkills(workspace, [skillB]);
+    entries = await readdir(join(workspace, '.agents', 'skills'));
+    expect(entries).toEqual(['beta']);
+  });
+
+  it('handles empty skill list', async () => {
+    await injectCodexSkills(workspace, []);
+    const agentsSkills = join(workspace, '.agents', 'skills');
+    const entries = await readdir(agentsSkills);
+    expect(entries).toEqual([]);
+  });
+
+  it('does not remove non-symlink entries in .agents/skills/', async () => {
+    const agentsSkills = join(workspace, '.agents', 'skills');
+    await mkdir(agentsSkills, { recursive: true });
+    await mkdir(join(agentsSkills, 'user-managed'));
+    await writeFile(join(agentsSkills, 'user-managed', 'SKILL.md'), '# User');
+
+    const skill1 = join(skillSrc, 'injected');
+    await mkdir(skill1, { recursive: true });
+
+    await injectCodexSkills(workspace, [skill1]);
+
+    const entries = (await readdir(agentsSkills)).sort();
+    expect(entries).toContain('user-managed');
+    expect(entries).toContain('injected');
   });
 });

@@ -99,11 +99,18 @@ codex exec resume --json --full-auto --skip-git-repo-check <thread_id> "<prompt>
 
 ### 技能注入
 
-Codex 通过 workspace 根目录的 `AGENTS.md` 发现技能。GolemBot 会从 `skills/` 目录自动生成该文件，无需额外配置。
+GolemBot 通过两种机制向 Codex 注入技能：
+
+1. **`.agents/skills/` 符号链接** — 每个技能目录被 symlink 到 `.agents/skills/<name>`，匹配 Codex 原生的技能发现机制（progressive disclosure）
+2. **`AGENTS.md`** — 自动生成在 workspace 根目录，包含技能描述和项目指令
 
 ```
 my-bot/
 ├── AGENTS.md          # 自动生成，包含所有技能描述
+├── .agents/
+│   └── skills/
+│       ├── general → ../../skills/general     # 符号链接
+│       └── im-adapter → ../../skills/im-adapter
 └── skills/
     ├── general/
     └── im-adapter/
@@ -136,4 +143,4 @@ codex exec resume --json --full-auto --skip-git-repo-check <thread_id> "<prompt>
 
 - Codex Cloud 任务仅在 ChatGPT OAuth 模式下可用，API Key 模式不支持
 - 与其他引擎不同，Codex 的 `done` 事件不包含费用/Token 统计
-- 技能通过 workspace 根目录的 `AGENTS.md` 发现（与 Claude Code 使用同一文件）
+- 技能通过 `.agents/skills/` 符号链接（Codex 原生发现）和 workspace 根目录的 `AGENTS.md` 注入

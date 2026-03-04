@@ -99,11 +99,18 @@ Flags used:
 
 ### Skill Injection
 
-Codex discovers skills via `AGENTS.md` at the workspace root. GolemBot generates this file automatically from your `skills/` directory — no additional setup is needed.
+GolemBot injects skills into Codex via two mechanisms:
+
+1. **`.agents/skills/` symlinks** — each skill directory is symlinked to `.agents/skills/<name>`, matching Codex's native skill discovery (progressive disclosure)
+2. **`AGENTS.md`** — auto-generated at the workspace root with skill descriptions and project instructions
 
 ```
 my-bot/
 ├── AGENTS.md          # auto-generated, lists all skill descriptions
+├── .agents/
+│   └── skills/
+│       ├── general → ../../skills/general     # symlink
+│       └── im-adapter → ../../skills/im-adapter
 └── skills/
     ├── general/
     └── im-adapter/
@@ -136,4 +143,4 @@ The `resume` subcommand inherits all flags and continues the existing session co
 
 - Codex Cloud (Codex Cloud tasks) is only available with ChatGPT OAuth, not with an API key
 - Unlike other engines, Codex does not provide cost/token tracking in the `done` event
-- Skills are discovered via `AGENTS.md` at the workspace root — the same file used by Claude Code
+- Skills are injected via `.agents/skills/` symlinks (native Codex discovery) and `AGENTS.md` at the workspace root

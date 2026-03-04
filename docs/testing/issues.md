@@ -150,3 +150,27 @@ if (gc.groupPolicy === 'mention-only' && !mentioned) return;
 Telegram adapter 实现：`bot.api.sendChatAction(chatId, 'typing')`。其他平台可按需实现同一接口：
 - Slack：`chat.postMessage` ephemeral 或 reaction emoji
 - Discord：`channel.sendTyping()`
+
+---
+
+## Issue 6 · Codex 引擎未注入 skills 到 `.agents/skills/` 目录
+
+**发现时间**: 2026-03-04
+**类型**: 功能缺失
+**严重级别**: Medium
+**状态**: ✅ 已修复
+
+### 现象
+Codex CLI 原生支持 `.agents/skills/` 目录（与 Claude Code 的 `.claude/skills/`、Cursor 的 `.cursor/skills/` 同类机制），但 GolemBot 的 `CodexEngine` 未将 skills symlink 到该目录。当前仅依赖 `workspace.ts` 生成的 `AGENTS.md` 文件传递 skill 信息。
+
+### 影响
+- Codex 无法通过原生 skill 发现机制（progressive disclosure）加载 GolemBot skills
+- Skill 内的附带文件（脚本、模板、参考文档）不会被 Codex 读到，只有 `AGENTS.md` 中的文本描述可见
+
+### 参考
+- Codex skills 官方文档: https://developers.openai.com/codex/concepts/customization/
+- Codex skills 目录约定: 全局 `~/.agents/skills/`，项目级 `.agents/skills/`
+- 每个 skill 为一个包含 `SKILL.md` 的目录，支持 frontmatter（`name`, `description`）
+
+### 修复方案（已实施）
+在 `src/engines/codex.ts` 的 `injectCodexSkills()` 中，仿照其他引擎的实现，将 `skills/` 目录 symlink 到 `.agents/skills/`。每次 invoke 时清理旧 symlink 并重建，保持与 skills 目录同步。

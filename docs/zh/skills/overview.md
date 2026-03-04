@@ -43,4 +43,4 @@ description: 这个技能做什么的简要说明
 - **不在配置中声明** — `skills/` 目录是唯一的事实来源
 - **没有独立的 Tool 概念** — 脚本放在技能目录里，`SKILL.md` 描述如何调用
 - **即放即用** — 复制目录即添加技能；删除目录即移除技能
-- **引擎无关** — 同一个 Skill 在 Cursor、Claude Code 和 OpenCode 上都能用
+- **引擎无关** — 同一个 Skill 在 Cursor、Claude Code、OpenCode 和 Codex 上都能用

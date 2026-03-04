@@ -203,7 +203,22 @@ GolemBot automatically uses stored OAuth credentials — no extra configuration 
 
 ---
 
-### Skill Auto-Discovery Mechanism (AGENTS.md)
+### Skill Discovery
+
+Codex supports two skill discovery mechanisms:
+
+#### 1. `.agents/skills/` (Native Skill Directories)
+
+Each skill is a directory containing a `SKILL.md` with optional frontmatter (`name`, `description`):
+
+- **Global:** `~/.agents/skills/`
+- **Project:** `.agents/skills/`
+
+Codex auto-discovers skill directories and uses progressive disclosure (skill descriptions loaded first, full content on-demand).
+
+**GolemBot injects skills** by symlinking each `skills/<name>` directory to `.agents/skills/<name>`.
+
+#### 2. `AGENTS.md` (Project Instructions)
 
 Codex reads `AGENTS.md` files before doing any work. Discovery order:
 
@@ -217,7 +232,7 @@ project_doc_fallback_filenames = ["TEAM_GUIDE.md", ".agents.md"]
 project_doc_max_bytes = 65536    # default 32 KiB per file
 ```
 
-**For GolemBot:** Place the generated `AGENTS.md` (assembled from skill SKILL.md files) in the workspace root — Codex will auto-discover it.
+**GolemBot** also generates `AGENTS.md` at the workspace root with skill descriptions and project instructions.
 
 **Protected directories (always read-only, even in workspace-write mode):**
 - `.git/`
