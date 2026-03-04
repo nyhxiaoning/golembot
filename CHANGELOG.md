@@ -1,3 +1,10 @@
+## [0.8.3](https://github.com/0xranx/golembot/compare/v0.8.2...v0.8.3) (2026-03-04)
+
+
+### Bug Fixes
+
+* forward all Feishu group messages to gateway for smart/always mode ([43d3917](https://github.com/0xranx/golembot/commit/43d391794320ccaf90e1408953228bc36e3fbe2e))
+
 ## [0.8.2](https://github.com/0xranx/golembot/compare/v0.8.1...v0.8.2) (2026-03-03)
 
 
