@@ -1,5 +1,27 @@
 # IM Playbook Testing — Issues Log
 
+## Platform Note · DingTalk Smart Mode 平台限制
+
+**发现时间**: 2026-03-04
+**测试阶段**: DingTalk E-3 Smart mode
+**类型**: 平台限制（非 bug）
+
+### 现象
+在钉钉群中，`groupPolicy: smart` 模式下，bot 无法积累非 @mention 消息的上下文。发送普通群消息（不 @mention bot）时，gateway 日志无任何记录；@mention bot 询问之前群聊内容时，bot 回答"没有相关信息"。
+
+### 根本原因
+钉钉 Stream SDK（`TOPIC_ROBOT` 回调）**平台层面只投递 @mention 消息**给机器人，非 mention 的群消息完全不发给 bot 进程。这是钉钉的安全设计，adapter 层无法绕过（与飞书不同，飞书的过滤是在 adapter 代码里，可以修改；钉钉的过滤在平台侧）。
+
+### 影响
+- `mention-only`：正常工作 ✅
+- `smart`：仅能看到 @mention 消息，无法观察群背景上下文
+- `always`：仅响应 @mention 消息（平台限制等同于 mention-only）
+
+### 建议
+在钉钉文档中注明此平台限制，用户应使用 `mention-only` 模式。
+
+---
+
 ## Issue 1 · Cross-engine session ID contamination causes opencode hang
 
 **发现时间**: 2026-03-03

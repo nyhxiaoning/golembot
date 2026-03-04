@@ -46,6 +46,25 @@ golembot gateway --verbose
 
 The adapter connects to DingTalk's stream service on startup. Messages appear with `[dingtalk]` prefix when `--verbose` is enabled.
 
+## Group Chat
+
+DingTalk server groups are treated as **group** chats. Configure the response policy via `groupChat` in `golem.yaml`:
+
+```yaml
+groupChat:
+  groupPolicy: mention-only  # recommended for DingTalk
+```
+
+::: warning Platform Limitation
+DingTalk's Stream SDK (`TOPIC_ROBOT`) **only delivers messages where the bot is @mentioned**. Non-mention group messages are never sent to the bot process. This means:
+
+- `mention-only` — works as expected
+- `smart` — cannot observe non-mention messages for group context accumulation
+- `always` — behaves the same as `mention-only` (platform-side filtering)
+
+For best results, use `mention-only` with DingTalk.
+:::
+
 ## Notes
 
 - Stream mode uses outbound WebSocket — works behind NAT/firewalls

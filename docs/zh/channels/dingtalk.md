@@ -37,6 +37,25 @@ DINGTALK_CLIENT_SECRET=xxxxxxxxxxxxxxxxxx
 golembot gateway --verbose
 ```
 
+## 群聊行为
+
+钉钉群被视为**群聊**。通过 `golem.yaml` 中的 `groupChat` 字段配置响应策略：
+
+```yaml
+groupChat:
+  groupPolicy: mention-only  # 钉钉推荐使用此模式
+```
+
+::: warning 平台限制
+钉钉 Stream SDK（`TOPIC_ROBOT`）**仅投递 @mention 机器人的消息**，非 mention 的群消息不会发送给 bot 进程。这意味着：
+
+- `mention-only` — 正常工作
+- `smart` — 无法观察非 mention 消息，无法积累群上下文
+- `always` — 行为等同于 `mention-only`（平台侧过滤）
+
+建议钉钉用户使用 `mention-only` 模式。
+:::
+
 ## 说明
 
 - Stream 模式使用出站 WebSocket — 可在 NAT/防火墙后运行
