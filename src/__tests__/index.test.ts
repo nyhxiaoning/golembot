@@ -451,7 +451,7 @@ describe('createAssistant', () => {
   // ── conversation history ───────────────────────────
 
   describe('conversation history', () => {
-    it('writes user and assistant entries to history.jsonl', async () => {
+    it('writes user and assistant entries to per-session history file', async () => {
       mockedCreateEngine.mockReturnValue({
         async *invoke() {
           yield { type: 'text', content: 'world' } as StreamEvent;
@@ -462,11 +462,76 @@ describe('createAssistant', () => {
       const assistant = createAssistant({ dir, timeoutMs: 5000 });
       for await (const _ of assistant.chat('hello', { sessionKey: 'hist-key' })) {}
 
-      const raw = await readFile(join(dir, '.golem', 'history.jsonl'), 'utf-8');
+      const raw = await readFile(join(dir, '.golem', 'history', 'hist-key.jsonl'), 'utf-8');
       const lines = raw.trim().split('\n').map(l => JSON.parse(l));
 
       expect(lines[0]).toMatchObject({ role: 'user', content: 'hello', sessionKey: 'hist-key' });
       expect(lines[1]).toMatchObject({ role: 'assistant', content: 'world', durationMs: 100, costUsd: 0.005 });
+    });
+  });
+
+  // ── history recovery on new session ──────────────
+
+  describe('history recovery', () => {
+    it('injects history prompt when session is new and history file exists', async () => {
+      let capturedPrompt = '';
+      mockedCreateEngine.mockReturnValue({
+        async *invoke(prompt: string) {
+          capturedPrompt = prompt;
+          yield { type: 'done', sessionId: 'new-sess' } as StreamEvent;
+        },
+      });
+
+      // Write a prior history file for this sessionKey
+      const { appendHistory } = await import('../session.js');
+      await appendHistory(dir, { ts: 'ts', sessionKey: 'user:alice', role: 'user', content: 'old question' });
+      await appendHistory(dir, { ts: 'ts', sessionKey: 'user:alice', role: 'assistant', content: 'old answer' });
+
+      // No saved session → new session, history file exists → should inject
+      const assistant = createAssistant({ dir, timeoutMs: 5000 });
+      for await (const _ of assistant.chat('new question', { sessionKey: 'user:alice' })) {}
+
+      expect(capturedPrompt).toContain('[System: This is a new session');
+      expect(capturedPrompt).toContain('user:alice.jsonl');
+      expect(capturedPrompt).toContain('new question');
+    });
+
+    it('does NOT inject when session already exists', async () => {
+      let capturedPrompt = '';
+      mockedCreateEngine.mockReturnValue({
+        async *invoke(prompt: string) {
+          capturedPrompt = prompt;
+          yield { type: 'done', sessionId: 'existing-sess' } as StreamEvent;
+        },
+      });
+
+      // Save a session first so loadSession returns a valid ID
+      const { saveSession, appendHistory } = await import('../session.js');
+      await saveSession(dir, 'existing-sess', 'user:bob', 'cursor');
+      await appendHistory(dir, { ts: 'ts', sessionKey: 'user:bob', role: 'user', content: 'old msg' });
+
+      const assistant = createAssistant({ dir, timeoutMs: 5000 });
+      for await (const _ of assistant.chat('follow up', { sessionKey: 'user:bob' })) {}
+
+      expect(capturedPrompt).not.toContain('[System: This is a new session');
+      expect(capturedPrompt).toBe('follow up');
+    });
+
+    it('does NOT inject when no history file exists', async () => {
+      let capturedPrompt = '';
+      mockedCreateEngine.mockReturnValue({
+        async *invoke(prompt: string) {
+          capturedPrompt = prompt;
+          yield { type: 'done', sessionId: 'brand-new' } as StreamEvent;
+        },
+      });
+
+      // No history file, no saved session → truly new user
+      const assistant = createAssistant({ dir, timeoutMs: 5000 });
+      for await (const _ of assistant.chat('first message', { sessionKey: 'user:charlie' })) {}
+
+      expect(capturedPrompt).not.toContain('[System: This is a new session');
+      expect(capturedPrompt).toBe('first message');
     });
   });
 

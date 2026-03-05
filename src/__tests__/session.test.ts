@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtemp, rm, readFile, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { loadSession, saveSession, clearSession, pruneExpiredSessions, appendHistory } from '../session.js';
+import { loadSession, saveSession, clearSession, pruneExpiredSessions, appendHistory, getHistoryPath } from '../session.js';
 
 describe('session', () => {
   let dir: string;
@@ -153,21 +153,51 @@ describe('session', () => {
   });
 
   describe('appendHistory', () => {
-    it('appends user and assistant entries as JSONL', async () => {
+    it('writes per-session JSONL files', async () => {
       await appendHistory(dir, { ts: '2026-01-01T00:00:00Z', sessionKey: 'k', role: 'user', content: 'hi' });
       await appendHistory(dir, { ts: '2026-01-01T00:00:01Z', sessionKey: 'k', role: 'assistant', content: 'hello', durationMs: 500, costUsd: 0.01 });
 
-      const raw = await readFile(join(dir, '.golem', 'history.jsonl'), 'utf-8');
+      const raw = await readFile(join(dir, '.golem', 'history', 'k.jsonl'), 'utf-8');
       const lines = raw.trim().split('\n').map(l => JSON.parse(l));
       expect(lines).toHaveLength(2);
       expect(lines[0]).toEqual({ ts: '2026-01-01T00:00:00Z', sessionKey: 'k', role: 'user', content: 'hi' });
       expect(lines[1]).toMatchObject({ role: 'assistant', content: 'hello', durationMs: 500, costUsd: 0.01 });
     });
 
-    it('creates .golem dir if missing', async () => {
+    it('creates .golem/history dir if missing', async () => {
       await appendHistory(dir, { ts: 'ts', sessionKey: 'k', role: 'user', content: 'test' });
-      const raw = await readFile(join(dir, '.golem', 'history.jsonl'), 'utf-8');
+      const raw = await readFile(join(dir, '.golem', 'history', 'k.jsonl'), 'utf-8');
       expect(raw).toContain('test');
+    });
+
+    it('different sessionKeys write to different files', async () => {
+      await appendHistory(dir, { ts: 'ts', sessionKey: 'alice', role: 'user', content: 'msg-a' });
+      await appendHistory(dir, { ts: 'ts', sessionKey: 'bob', role: 'user', content: 'msg-b' });
+
+      const rawA = await readFile(join(dir, '.golem', 'history', 'alice.jsonl'), 'utf-8');
+      const rawB = await readFile(join(dir, '.golem', 'history', 'bob.jsonl'), 'utf-8');
+      expect(rawA).toContain('msg-a');
+      expect(rawA).not.toContain('msg-b');
+      expect(rawB).toContain('msg-b');
+      expect(rawB).not.toContain('msg-a');
+    });
+
+    it('escapes special characters in sessionKey for filename', async () => {
+      await appendHistory(dir, { ts: 'ts', sessionKey: 'slack:C123/U456', role: 'user', content: 'hi' });
+      const raw = await readFile(join(dir, '.golem', 'history', 'slack:C123-U456.jsonl'), 'utf-8');
+      expect(raw).toContain('hi');
+    });
+  });
+
+  describe('getHistoryPath', () => {
+    it('returns per-session path', () => {
+      const p = getHistoryPath(dir, 'user:alice');
+      expect(p).toBe(join(dir, '.golem', 'history', 'user:alice.jsonl'));
+    });
+
+    it('escapes special characters', () => {
+      const p = getHistoryPath(dir, 'slack:C123/U456');
+      expect(p).toBe(join(dir, '.golem', 'history', 'slack:C123-U456.jsonl'));
     });
   });
 

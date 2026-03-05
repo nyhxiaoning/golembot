@@ -1,6 +1,7 @@
 import { resolve } from 'node:path';
 import { ensureReady, initWorkspace, type GolemConfig, type SkillInfo } from './workspace.js';
-import { loadSession, saveSession, clearSession, pruneExpiredSessions, appendHistory } from './session.js';
+import { existsSync } from 'node:fs';
+import { loadSession, saveSession, clearSession, pruneExpiredSessions, appendHistory, getHistoryPath } from './session.js';
 import { createEngine, type StreamEvent, type AgentEngine } from './engine.js';
 
 export type { StreamEvent } from './engine.js';
@@ -121,6 +122,20 @@ export function createAssistant(opts: CreateAssistantOpts): Assistant {
     const sessionId = await loadSession(dir, sessionKey, engineType);
     const skillPaths = skills.map(s => s.path);
 
+    // When starting a fresh session, check if there is a per-session history file
+    // from prior conversations. If so, prepend a hint so the agent can read it and
+    // restore context (e.g. after engine switch or session expiry).
+    let finalMessage = message;
+    if (!sessionId) {
+      const hPath = getHistoryPath(dir, sessionKey);
+      if (existsSync(hPath)) {
+        finalMessage =
+          `[System: This is a new session but you have prior conversation history with this user. ` +
+          `Read ${hPath} to restore context before responding.]\n\n` +
+          message;
+      }
+    }
+
     // Prune once per process
     if (!pruneDone) {
       pruneDone = true;
@@ -147,7 +162,7 @@ export function createAssistant(opts: CreateAssistantOpts): Assistant {
     let doneEvt: Extract<StreamEvent, { type: 'done' }> | undefined;
 
     try {
-      for await (const event of engine.invoke(message, {
+      for await (const event of engine.invoke(finalMessage, {
         workspace: dir,
         skillPaths,
         sessionId,

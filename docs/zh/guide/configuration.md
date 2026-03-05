@@ -120,6 +120,20 @@ groupChat:
   maxTurns: 5            # 连续回复超过 5 次后自动沉默（默认：10）
 ```
 
+### 会话历史
+
+GolemBot 自动将每轮对话记录到按 session 分隔的 JSONL 文件中：
+
+```
+.golem/history/{sessionKey}.jsonl
+```
+
+每行是一个 JSON 对象，包含 `ts`（时间戳）、`sessionKey`、`role`（`user` 或 `assistant`）、`content`，以及可选的 `durationMs` / `costUsd` 字段。
+
+**自动上下文恢复：** 当 session 丢失时——无论是切换引擎、session 过期还是恢复失败——GolemBot 会检测到当前没有活跃 session，并指示 agent 在回复前先读取历史文件恢复上下文。用户无需重复之前说过的话。
+
+此功能无需配置，开箱即用。`.golem/` 目录默认已在 `.gitignore` 中排除。
+
 ### `gateway`
 
 | 字段 | 类型 | 默认值 | 说明 |

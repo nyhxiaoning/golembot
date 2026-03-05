@@ -119,6 +119,20 @@ groupChat:
   maxTurns: 5            # stop after 5 consecutive bot replies (default: 10)
 ```
 
+### Conversation History
+
+GolemBot automatically records every conversation turn to per-session JSONL files:
+
+```
+.golem/history/{sessionKey}.jsonl
+```
+
+Each line is a JSON object with `ts`, `sessionKey`, `role` (`user` or `assistant`), `content`, and optional `durationMs` / `costUsd` fields.
+
+**Automatic context recovery:** When a session is lost — due to engine switch, session expiry, or resume failure — GolemBot detects that no active session exists and instructs the agent to read the history file before responding. The agent restores context from the conversation log automatically, so users don't need to repeat themselves.
+
+This feature requires no configuration. The `.golem/` directory is gitignored by default.
+
 ### `gateway`
 
 | Field | Type | Default | Description |

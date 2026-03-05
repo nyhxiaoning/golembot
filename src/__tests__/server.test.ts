@@ -333,7 +333,7 @@ describe('Golem HTTP Server', () => {
       await startServer();
       await request(server, 'POST', '/chat', { message: 'hello world', sessionKey: 'http-hist' });
 
-      const raw = await readFile(join(dir, '.golem', 'history.jsonl'), 'utf-8');
+      const raw = await readFile(join(dir, '.golem', 'history', 'http-hist.jsonl'), 'utf-8');
       const lines = raw.trim().split('\n').map(l => JSON.parse(l));
 
       expect(lines.find((l: { role: string }) => l.role === 'user')).toMatchObject({

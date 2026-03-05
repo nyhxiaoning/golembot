@@ -482,6 +482,75 @@ async function main() {
       console.error(e);
     }
 
+    // ╔═══════════════════════════════════════════════════════╗
+    // ║  PART 5: History recovery — session loss + restore   ║
+    // ╚═══════════════════════════════════════════════════════╝
+
+    console.log(`\n${MAGENTA}${BOLD}  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}`);
+    console.log(`${MAGENTA}${BOLD}  PART 5: History recovery — simulate session loss + context restoration${RESET}`);
+    console.log(`${MAGENTA}${BOLD}  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}`);
+
+    step('Clear session — simulate engine switch or session expiry');
+
+    try {
+      // Clear the cron session (simulate session loss / engine switch)
+      const resetRes = await httpRequest(port, 'POST', '/reset',
+        { sessionKey: 'cron:hourly-check' }, SERVER_TOKEN);
+      record('POST /reset cron session → 200', resetRes.status === 200);
+
+      // Verify per-session history file still exists
+      const historyPath = join(workDir, '.golem', 'history', 'cron:hourly-check.jsonl');
+      record('Per-session history file exists after reset', await fileExists(historyPath));
+
+      // Verify session is actually gone
+      const sessRaw = JSON.parse(
+        await readFile(join(workDir, '.golem', 'sessions.json'), 'utf-8'),
+      );
+      record('Session cleared from sessions.json', !sessRaw['cron:hourly-check']);
+    } catch (e) {
+      record('Session clear', false);
+      console.error(e);
+    }
+
+    step('History recovery — agent reads prior conversation from history file');
+
+    try {
+      console.log(`  ${YELLOW}Simulate: session lost, send follow-up referencing prior context${RESET}\n`);
+
+      const res = await httpChat(
+        port,
+        'Earlier we discussed the monitor.csv analysis. What was the main issue with api-gateway?',
+        { token: SERVER_TOKEN, sessionKey: 'cron:hourly-check' },
+      );
+      info(`Reply first 120 chars: "${res.fullText.trim().slice(0, 120)}..."`);
+
+      const mentionsContext = res.fullText.includes('api-gateway') || res.fullText.includes('gateway') ||
+        res.fullText.includes('CPU') || res.fullText.includes('OOM') || res.fullText.includes('memory');
+      record('History recovery: agent recalls prior context', mentionsContext);
+      record('History recovery: non-empty reply', res.fullText.trim().length > 0);
+    } catch (e) {
+      record('History recovery', false);
+      console.error(e);
+    }
+
+    step('Verify history file integrity after recovery');
+
+    try {
+      const historyPath = join(workDir, '.golem', 'history', 'cron:hourly-check.jsonl');
+      const raw = await readFile(historyPath, 'utf-8');
+      const lines = raw.trim().split('\n').filter(l => l.trim());
+
+      const hasUser = lines.some(l => { try { return JSON.parse(l).role === 'user'; } catch { return false; } });
+      const hasAssistant = lines.some(l => { try { return JSON.parse(l).role === 'assistant'; } catch { return false; } });
+      record('History file has user entries', hasUser);
+      record('History file has assistant entries', hasAssistant);
+      record('History file has multiple entries', lines.length >= 4); // at least 2 rounds
+      info(`History file: ${lines.length} entries`);
+    } catch (e) {
+      record('History file integrity', false);
+      console.error(e);
+    }
+
   } finally {
     // ── Cleanup ────────────────────────────────────
 
@@ -518,7 +587,8 @@ async function main() {
     console.log(`    createAssistant({ dir, apiKey })         → programmatic create, no IDE`);
     console.log(`    createGolemServer(assistant, { token })  → HTTP service exposed`);
     console.log(`    POST /chat { sessionKey: "alert:xxx" }   → multi-source isolation`);
-    console.log(`    systemd restart → session restored       → seamless restart${RESET}\n`);
+    console.log(`    systemd restart → session restored       → seamless restart`);
+    console.log(`    session lost → history file → context restored${RESET}\n`);
 
     if (passed < total) {
       process.exit(1);

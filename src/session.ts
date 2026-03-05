@@ -28,8 +28,14 @@ function sessionPath(dir: string): string {
   return join(dir, GOLEM_DIR, SESSION_FILE);
 }
 
-function historyPath(dir: string): string {
-  return join(dir, GOLEM_DIR, HISTORY_FILE);
+function historyPath(dir: string, sessionKey?: string): string {
+  if (!sessionKey) return join(dir, GOLEM_DIR, HISTORY_FILE);
+  const safeKey = sessionKey.replace(/[^a-z0-9_:-]/gi, '-');
+  return join(dir, GOLEM_DIR, 'history', `${safeKey}.jsonl`);
+}
+
+export function getHistoryPath(dir: string, sessionKey: string): string {
+  return historyPath(dir, sessionKey);
 }
 
 async function readStore(dir: string): Promise<SessionStore> {
@@ -103,13 +109,13 @@ export async function pruneExpiredSessions(dir: string, maxAgeDays: number): Pro
 }
 
 export async function appendHistory(dir: string, entry: HistoryEntry): Promise<void> {
-  const path = historyPath(dir);
+  const path = historyPath(dir, entry.sessionKey);
   const line = JSON.stringify(entry) + '\n';
   try {
     await appendFile(path, line, 'utf-8');
   } catch (e: unknown) {
     if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
-      await mkdir(join(dir, GOLEM_DIR), { recursive: true });
+      await mkdir(join(dir, GOLEM_DIR, 'history'), { recursive: true });
       await appendFile(path, line, 'utf-8');
     }
     // other errors: best effort, silently ignored
