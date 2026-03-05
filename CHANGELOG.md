@@ -1,3 +1,10 @@
+# [0.11.0-beta.4](https://github.com/0xranx/golembot/compare/v0.11.0-beta.3...v0.11.0-beta.4) (2026-03-05)
+
+
+### Bug Fixes
+
+* update npm publish token for CI releases ([87d99b7](https://github.com/0xranx/golembot/commit/87d99b7e9262dffb5e3cfd09bcd9e9ac50417104))
+
 # [0.11.0-beta.3](https://github.com/0xranx/golembot/compare/v0.11.0-beta.2...v0.11.0-beta.3) (2026-03-05)
 
 
