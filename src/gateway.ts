@@ -2,7 +2,18 @@ import { resolve, join } from 'node:path';
 import { mkdir } from 'node:fs/promises';
 import { createAssistant, type Assistant } from './index.js';
 import { createGolemServer, type ServerOpts, type GolemServer } from './server.js';
-import { loadConfig, type GolemConfig, type ChannelsConfig, type GroupChatConfig } from './workspace.js';
+import {
+  loadConfig,
+  type GolemConfig,
+  type ChannelsConfig,
+  type GroupChatConfig,
+  type FeishuChannelConfig,
+  type DingtalkChannelConfig,
+  type WecomChannelConfig,
+  type SlackChannelConfig,
+  type TelegramChannelConfig,
+  type DiscordChannelConfig,
+} from './workspace.js';
 import {
   buildSessionKey,
   detectMention,
@@ -73,6 +84,22 @@ export function clearGroupChatState(sessionKey: string): void {
  */
 export const GROUP_TURN_RESET_MS = 60 * 60 * 1000; // 1 hour
 
+/**
+ * Purge all in-memory group state for groups that have been idle longer than
+ * `GROUP_TURN_RESET_MS`. Called periodically to prevent unbounded memory growth
+ * when a gateway process serves many dynamic groups over its lifetime.
+ */
+export function purgeIdleGroups(): void {
+  const cutoff = Date.now() - GROUP_TURN_RESET_MS;
+  for (const [key, ts] of groupLastActivity) {
+    if (ts < cutoff) {
+      groupHistories.delete(key);
+      groupTurnCounters.delete(key);
+      groupLastActivity.delete(key);
+    }
+  }
+}
+
 export function resolveGroupChatConfig(config: GolemConfig): Required<GroupChatConfig> {
   const gc = config.groupChat ?? {};
   return {
@@ -120,6 +147,19 @@ export function buildGroupPrompt(
   return parts.join('\n');
 }
 
+export function requireFields(
+  type: string,
+  config: Record<string, unknown>,
+  fields: string[],
+): void {
+  const missing = fields.filter(f => !config[f]);
+  if (missing.length > 0) {
+    throw new Error(
+      `Channel "${type}" is missing required config: ${missing.join(', ')}`,
+    );
+  }
+}
+
 async function createChannelAdapter(
   type: string,
   channelConfig: Record<string, unknown>,
@@ -127,28 +167,34 @@ async function createChannelAdapter(
 ): Promise<ChannelAdapter> {
   switch (type) {
     case 'feishu': {
+      requireFields(type, channelConfig, ['appId', 'appSecret']);
       const { FeishuAdapter } = await import('./channels/feishu.js');
-      return new FeishuAdapter(channelConfig as any);
+      return new FeishuAdapter(channelConfig as unknown as FeishuChannelConfig);
     }
     case 'dingtalk': {
+      requireFields(type, channelConfig, ['clientId', 'clientSecret']);
       const { DingtalkAdapter } = await import('./channels/dingtalk.js');
-      return new DingtalkAdapter(channelConfig as any);
+      return new DingtalkAdapter(channelConfig as unknown as DingtalkChannelConfig);
     }
     case 'wecom': {
+      requireFields(type, channelConfig, ['corpId', 'agentId', 'secret', 'token', 'encodingAESKey']);
       const { WecomAdapter } = await import('./channels/wecom.js');
-      return new WecomAdapter(channelConfig as any);
+      return new WecomAdapter(channelConfig as unknown as WecomChannelConfig);
     }
     case 'slack': {
+      requireFields(type, channelConfig, ['botToken', 'appToken']);
       const { SlackAdapter } = await import('./channels/slack.js');
-      return new SlackAdapter(channelConfig as any);
+      return new SlackAdapter(channelConfig as unknown as SlackChannelConfig);
     }
     case 'telegram': {
+      requireFields(type, channelConfig, ['botToken']);
       const { TelegramAdapter } = await import('./channels/telegram.js');
-      return new TelegramAdapter(channelConfig as any);
+      return new TelegramAdapter(channelConfig as unknown as TelegramChannelConfig);
     }
     case 'discord': {
+      requireFields(type, channelConfig, ['botToken']);
       const { DiscordAdapter } = await import('./channels/discord.js');
-      return new DiscordAdapter(channelConfig as any);
+      return new DiscordAdapter(channelConfig as unknown as DiscordChannelConfig);
     }
     default: {
       const adapterPath = channelConfig._adapter;
@@ -381,8 +427,13 @@ export async function startGateway(opts: GatewayOpts): Promise<void> {
     console.log(`   (no IM channels configured, HTTP API only)`);
   }
 
+  // Periodically purge idle group state to prevent unbounded memory growth
+  const purgeTimer = setInterval(purgeIdleGroups, GROUP_TURN_RESET_MS);
+  purgeTimer.unref(); // don't keep the process alive just for cleanup
+
   const shutdown = async () => {
     console.log('\nShutting down Gateway...');
+    clearInterval(purgeTimer);
     for (const adapter of adapters) {
       try {
         await adapter.stop();

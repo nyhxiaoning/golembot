@@ -9,6 +9,8 @@ import {
   resolveGroupChatConfig,
   GROUP_TURN_RESET_MS,
   clearGroupChatState,
+  purgeIdleGroups,
+  requireFields,
   groupHistories,
   groupTurnCounters,
   groupLastActivity,
@@ -376,6 +378,56 @@ describe('clearGroupChatState', () => {
     expect(groupHistories.size).toBe(0);
     expect(groupTurnCounters.size).toBe(0);
     expect(groupLastActivity.size).toBe(0);
+  });
+});
+
+describe('requireFields', () => {
+  it('passes when all required fields are present', () => {
+    expect(() => requireFields('test', { a: '1', b: '2' }, ['a', 'b'])).not.toThrow();
+  });
+
+  it('throws listing missing fields', () => {
+    expect(() => requireFields('feishu', { appId: 'x' }, ['appId', 'appSecret'])).toThrow(
+      'Channel "feishu" is missing required config: appSecret',
+    );
+  });
+
+  it('throws listing multiple missing fields', () => {
+    expect(() => requireFields('wecom', {}, ['corpId', 'secret'])).toThrow(
+      'Channel "wecom" is missing required config: corpId, secret',
+    );
+  });
+
+  it('treats empty string as missing', () => {
+    expect(() => requireFields('slack', { botToken: '' }, ['botToken'])).toThrow(/missing/);
+  });
+});
+
+describe('purgeIdleGroups', () => {
+  afterEach(() => {
+    groupHistories.clear();
+    groupTurnCounters.clear();
+    groupLastActivity.clear();
+  });
+
+  it('removes groups idle longer than GROUP_TURN_RESET_MS', () => {
+    const old = Date.now() - GROUP_TURN_RESET_MS - 1;
+    groupHistories.set('old:group', [{ senderName: 'a', text: 'x', isBot: false }]);
+    groupTurnCounters.set('old:group', 5);
+    groupLastActivity.set('old:group', old);
+
+    groupHistories.set('new:group', [{ senderName: 'b', text: 'y', isBot: false }]);
+    groupTurnCounters.set('new:group', 1);
+    groupLastActivity.set('new:group', Date.now());
+
+    purgeIdleGroups();
+
+    expect(groupHistories.has('old:group')).toBe(false);
+    expect(groupTurnCounters.has('old:group')).toBe(false);
+    expect(groupLastActivity.has('old:group')).toBe(false);
+
+    expect(groupHistories.has('new:group')).toBe(true);
+    expect(groupTurnCounters.has('new:group')).toBe(true);
   });
 });
 

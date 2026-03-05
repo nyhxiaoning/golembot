@@ -220,20 +220,23 @@ export function createAssistant(opts: CreateAssistantOpts): Assistant {
     const maxConcurrent = maxConcurrentOpt ?? 10;
     const maxQueuePerSession = maxQueuePerSessionOpt ?? 3;
 
-    // Global concurrency check (soft — sufficient to prevent overload)
-    if (activeChatCount >= maxConcurrent) {
+    // Increment first (synchronous), then check — eliminates the race window
+    // between the old check-then-await-then-increment pattern.
+    activeChatCount++;
+    if (activeChatCount > maxConcurrent) {
+      activeChatCount--;
       yield { type: 'error', message: `Server busy: too many concurrent requests (limit: ${maxConcurrent}). Try again later.` };
       return;
     }
 
-    // Per-session queue limit — synchronous path taken before any await
+    // Per-session queue limit
     const acquired = await mutex.tryAcquire(sessionKey, maxQueuePerSession);
     if (!acquired) {
+      activeChatCount--;
       yield { type: 'error', message: `Too many pending requests for this session (limit: ${maxQueuePerSession}). Try again later.` };
       return;
     }
 
-    activeChatCount++;
     try {
       yield* doChat(message, sessionKey, false);
     } finally {
