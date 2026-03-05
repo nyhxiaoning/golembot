@@ -1,3 +1,10 @@
+# [0.11.0-beta.8](https://github.com/0xranx/golembot/compare/v0.11.0-beta.7...v0.11.0-beta.8) (2026-03-05)
+
+
+### Bug Fixes
+
+* use card v2 markdown component for native list rendering in Feishu ([00be390](https://github.com/0xranx/golembot/commit/00be390b992f000627fbfc7bde54777d231b7c13))
+
 # [0.11.0-beta.6](https://github.com/0xranx/golembot/compare/v0.11.0-beta.5...v0.11.0-beta.6) (2026-03-05)
 
 
