@@ -1,3 +1,10 @@
+# [0.10.0](https://github.com/0xranx/golembot/compare/v0.9.0...v0.10.0) (2026-03-05)
+
+
+### Features
+
+* per-session conversation history with automatic context recovery ([e9690bf](https://github.com/0xranx/golembot/commit/e9690bffc0ce3a6421accd50de331a37cb012817))
+
 # [0.9.0](https://github.com/0xranx/golembot/compare/v0.8.6...v0.9.0) (2026-03-04)
 
 
