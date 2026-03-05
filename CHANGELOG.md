@@ -1,3 +1,10 @@
+## [0.10.1](https://github.com/0xranx/golembot/compare/v0.10.0...v0.10.1) (2026-03-05)
+
+
+### Bug Fixes
+
+* group chat memory leak, concurrency race condition, channel config validation ([7256c73](https://github.com/0xranx/golembot/commit/7256c730fbe8e422277a55d0c881a55f1c5a8c00))
+
 # [0.10.0](https://github.com/0xranx/golembot/compare/v0.9.0...v0.10.0) (2026-03-05)
 
 
