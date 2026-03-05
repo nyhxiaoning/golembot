@@ -1,4 +1,4 @@
-import type { ChannelAdapter, ChannelMessage } from '../channel.js';
+import type { ChannelAdapter, ChannelMessage, ReplyOptions } from '../channel.js';
 import type { SlackChannelConfig } from '../workspace.js';
 
 export class SlackAdapter implements ChannelAdapter {
@@ -104,7 +104,7 @@ export class SlackAdapter implements ChannelAdapter {
     console.log(`[slack] Socket Mode connection established`);
   }
 
-  async reply(msg: ChannelMessage, text: string): Promise<void> {
+  async reply(msg: ChannelMessage, text: string, options?: ReplyOptions): Promise<void> {
     if (!this.app) return;
     await this.app.client.chat.postMessage({
       channel: msg.chatId,

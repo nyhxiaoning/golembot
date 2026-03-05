@@ -257,6 +257,70 @@ export function markdownToCard(markdown: string): CardContent {
   };
 }
 
+/**
+ * Replace `@name` patterns in post content with Feishu `{ tag: 'at', user_id }` elements.
+ * Mutates the post in-place.
+ */
+export function injectMentionsIntoPost(
+  post: PostContent,
+  mentions: Array<{ name: string; platformId: string }>,
+): void {
+  if (!mentions.length) return;
+  const mentionMap = new Map(mentions.map(m => [m.name, m.platformId]));
+
+  for (let i = 0; i < post.zh_cn.content.length; i++) {
+    const line = post.zh_cn.content[i];
+    const newLine: PostElement[] = [];
+
+    for (const el of line) {
+      if (el.tag !== 'text' || !el.text) {
+        newLine.push(el);
+        continue;
+      }
+
+      // Split text on @name patterns and replace with at elements
+      let remaining = el.text;
+      const mentionPattern = /@([\w\u4e00-\u9fff]{1,20})/g;
+      let lastIdx = 0;
+      let match;
+
+      // Reset regex state
+      mentionPattern.lastIndex = 0;
+      const parts: PostElement[] = [];
+
+      while ((match = mentionPattern.exec(remaining)) !== null) {
+        const name = match[1];
+        const userId = mentionMap.get(name);
+        if (!userId) continue;
+
+        // Text before the mention
+        if (match.index > lastIdx) {
+          const beforeText = remaining.slice(lastIdx, match.index);
+          parts.push({ ...el, text: beforeText });
+        }
+
+        // The @mention element
+        parts.push({ tag: 'at', user_id: userId });
+
+        lastIdx = match.index + match[0].length;
+      }
+
+      if (parts.length === 0) {
+        // No mentions found in this element
+        newLine.push(el);
+      } else {
+        // Remaining text after last mention
+        if (lastIdx < remaining.length) {
+          parts.push({ ...el, text: remaining.slice(lastIdx) });
+        }
+        newLine.push(...parts);
+      }
+    }
+
+    post.zh_cn.content[i] = newLine;
+  }
+}
+
 /** Preprocess Markdown for lark_md compatibility. */
 function preprocessForCard(text: string): string {
   return text

@@ -773,13 +773,22 @@ describe('handleMessage — full gateway pipeline', () => {
   // ── DM handling ─────────────────────────────────────────────────────────
 
   describe('DM handling', () => {
-    it('DM text is passed to assistant without mention stripping', async () => {
+    it('DM text includes private conversation context', async () => {
       const assistant = makeMockAssistant('ok');
       const adapter = makeMockAdapter();
       const msg = makeDmMsg({ text: '@golem test' });
       await handleMessage(msg, makeConfig(), assistant, adapter, 'slack', false, dir);
-      // DM: text goes straight through (no stripMention), sessionKey includes senderId
-      expect(assistant.lastPrompt).toBe('@golem test');
+      // DM: text is wrapped with system context (sender name + private chat indicator)
+      expect(assistant.lastPrompt).toContain('[System: This is a private 1-on-1 conversation with alice.]');
+      expect(assistant.lastPrompt).toContain('@golem test');
+    });
+
+    it('DM context uses senderId when senderName is missing', async () => {
+      const assistant = makeMockAssistant('ok');
+      const adapter = makeMockAdapter();
+      const msg = makeDmMsg({ text: 'hello', senderName: undefined });
+      await handleMessage(msg, makeConfig(), assistant, adapter, 'slack', false, dir);
+      expect(assistant.lastPrompt).toContain('[System: This is a private 1-on-1 conversation with U001.]');
     });
 
     it('DM does not use group state Maps', async () => {

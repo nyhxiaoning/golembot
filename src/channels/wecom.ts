@@ -1,5 +1,5 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import type { ChannelAdapter, ChannelMessage } from '../channel.js';
+import type { ChannelAdapter, ChannelMessage, ReplyOptions } from '../channel.js';
 import type { WecomChannelConfig } from '../workspace.js';
 
 function readBody(req: IncomingMessage): Promise<string> {
@@ -181,7 +181,7 @@ export class WecomAdapter implements ChannelAdapter {
     });
   }
 
-  async reply(msg: ChannelMessage, text: string): Promise<void> {
+  async reply(msg: ChannelMessage, text: string, options?: ReplyOptions): Promise<void> {
     const token = await this.getAccessToken();
     const url = `https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=${token}`;
     const body = {

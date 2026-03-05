@@ -1,4 +1,4 @@
-import type { ChannelAdapter, ChannelMessage } from '../channel.js';
+import type { ChannelAdapter, ChannelMessage, ReplyOptions } from '../channel.js';
 import type { DingtalkChannelConfig } from '../workspace.js';
 
 export class DingtalkAdapter implements ChannelAdapter {
@@ -74,7 +74,7 @@ export class DingtalkAdapter implements ChannelAdapter {
     console.log(`[dingtalk] Stream connection established`);
   }
 
-  async reply(msg: ChannelMessage, text: string): Promise<void> {
+  async reply(msg: ChannelMessage, text: string, options?: ReplyOptions): Promise<void> {
     const raw = msg.raw as { _sessionWebhook?: string; senderStaffId?: string };
     const webhook = raw?._sessionWebhook;
     if (!webhook) return;

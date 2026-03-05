@@ -1,4 +1,4 @@
-import type { ChannelAdapter, ChannelMessage } from '../channel.js';
+import type { ChannelAdapter, ChannelMessage, ReplyOptions } from '../channel.js';
 import type { DiscordChannelConfig } from '../workspace.js';
 
 export class DiscordAdapter implements ChannelAdapter {
@@ -88,7 +88,7 @@ export class DiscordAdapter implements ChannelAdapter {
     });
   }
 
-  async reply(msg: ChannelMessage, text: string): Promise<void> {
+  async reply(msg: ChannelMessage, text: string, options?: ReplyOptions): Promise<void> {
     const raw = msg.raw as any;
     await raw.reply({ content: text });
   }

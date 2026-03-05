@@ -1,4 +1,4 @@
-import type { ChannelAdapter, ChannelMessage } from '../channel.js';
+import type { ChannelAdapter, ChannelMessage, ReplyOptions } from '../channel.js';
 import type { TelegramChannelConfig } from '../workspace.js';
 
 export class TelegramAdapter implements ChannelAdapter {
@@ -85,7 +85,7 @@ export class TelegramAdapter implements ChannelAdapter {
     console.log(`[telegram] Long-polling started (@${this.botUsername})`);
   }
 
-  async reply(msg: ChannelMessage, text: string): Promise<void> {
+  async reply(msg: ChannelMessage, text: string, options?: ReplyOptions): Promise<void> {
     if (!this.bot) return;
     await this.bot.api.sendMessage(Number(msg.chatId), text);
   }
