@@ -1,3 +1,10 @@
+# [0.11.0-beta.5](https://github.com/0xranx/golembot/compare/v0.11.0-beta.4...v0.11.0-beta.5) (2026-03-05)
+
+
+### Bug Fixes
+
+* explicitly disable npm provenance to fix silent publish failure ([8a8c5ac](https://github.com/0xranx/golembot/commit/8a8c5ac929907996725bdefefc74138f189d2f48))
+
 # [0.11.0-beta.4](https://github.com/0xranx/golembot/compare/v0.11.0-beta.3...v0.11.0-beta.4) (2026-03-05)
 
 
