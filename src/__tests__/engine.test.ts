@@ -1,9 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtemp, rm, readlink, readdir, mkdir, writeFile, readFile, lstat } from 'node:fs/promises';
+import { ClaudeCodeEngine, CodexEngine, CursorEngine, OpenCodeEngine, TraeEngine, createEngine, ensureOpenCodeConfig, injectClaudeSkills, injectCodexSkills, injectOpenCodeSkills, injectSkills, parseClaudeStreamLine, parseCodexStreamLine, parseOpenCodeStreamLine, parseStreamLine, resolveOpenCodeEnv, stripAnsi } from '../engine.js';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { lstat, mkdir, mkdtemp, readFile, readdir, readlink, rm, writeFile } from 'node:fs/promises';
+
+import type { StreamEvent } from '../engine.js';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { parseStreamLine, stripAnsi, injectSkills, parseClaudeStreamLine, injectClaudeSkills, parseOpenCodeStreamLine, resolveOpenCodeEnv, injectOpenCodeSkills, ensureOpenCodeConfig, parseCodexStreamLine, injectCodexSkills, createEngine, CursorEngine, ClaudeCodeEngine, OpenCodeEngine, CodexEngine } from '../engine.js';
-import type { StreamEvent } from '../engine.js';
 
 // ═══════════════════════════════════════════════════════
 // Real Cursor stream-json samples (based on actual output)
@@ -780,6 +781,10 @@ describe('createEngine', () => {
 
   it('codex → CodexEngine', () => {
     expect(createEngine('codex')).toBeInstanceOf(CodexEngine);
+  });
+
+  it('trae → TraeEngine', () => {
+    expect(createEngine('trae')).toBeInstanceOf(TraeEngine);
   });
 
   it('unknown engine → throws', () => {

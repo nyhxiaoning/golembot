@@ -29,18 +29,21 @@ export { parseStreamLine, injectSkills, CursorEngine } from './engines/cursor.js
 export { parseClaudeStreamLine, injectClaudeSkills, ClaudeCodeEngine } from './engines/claude-code.js';
 export { parseOpenCodeStreamLine, injectOpenCodeSkills, ensureOpenCodeConfig, resolveOpenCodeEnv, OpenCodeEngine } from './engines/opencode.js';
 export { parseCodexStreamLine, injectCodexSkills, CodexEngine } from './engines/codex.js';
+export { parseTraeStreamLine, injectTraeSkills, TraeEngine } from './engines/trae.js';
 
 // ── Engine factory ───────────────────────────────────────
 
-import { CursorEngine } from './engines/cursor.js';
 import { ClaudeCodeEngine } from './engines/claude-code.js';
-import { OpenCodeEngine } from './engines/opencode.js';
 import { CodexEngine } from './engines/codex.js';
+import { CursorEngine } from './engines/cursor.js';
+import { OpenCodeEngine } from './engines/opencode.js';
+import { TraeEngine } from './engines/trae.js';
 
 export function createEngine(type: string): AgentEngine {
   if (type === 'cursor') return new CursorEngine();
   if (type === 'claude-code') return new ClaudeCodeEngine();
   if (type === 'opencode') return new OpenCodeEngine();
   if (type === 'codex') return new CodexEngine();
-  throw new Error(`Unsupported engine: ${type}. Supported: 'cursor', 'claude-code', 'opencode', 'codex'.`);
+  if (type === 'trae') return new TraeEngine();
+  throw new Error(`Unsupported engine: ${type}. Supported: 'cursor', 'claude-code', 'opencode', 'codex', 'trae'.`);
 }
